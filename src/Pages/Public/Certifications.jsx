@@ -313,7 +313,7 @@ export default function Certificaciones() {
           Para Consultoría
         </StyledTitle>
 
-        <Grid container spacing={3}>
+        <Grid container spacing={3} justifyContent="center">
           {certifications.map((cert, index) => (
             <Grid item xs={12} md={4} key={index}>
               <StyledCard>

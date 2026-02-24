@@ -9,6 +9,10 @@ import {
   Stack,
   TextField,
   Box,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import { AddOutlined, EditOutlined } from "@mui/icons-material";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
@@ -20,6 +24,7 @@ import DataTable from "examples/Tables/DataTable";
 import Footer from "examples/Footer";
 import Swal from "sweetalert2";
 import { getSectors, PostSector, UpdateSector } from "../API/Sector";
+import CloseIcon from "@mui/icons-material/Close";
 
 export default function SectorsIndexPage() {
   const [sectors, setSectors] = useState([]);
@@ -29,6 +34,7 @@ export default function SectorsIndexPage() {
   const [sectorName, setSectorName] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [errors, setErrors] = useState({});
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     loadSectors();
@@ -38,7 +44,9 @@ export default function SectorsIndexPage() {
     setLoading(true);
     try {
       const data = await getSectors();
+
       setSectors(data);
+      
     } catch (e) {
       console.error("Error cargando sectores", e);
     } finally {
@@ -68,38 +76,62 @@ export default function SectorsIndexPage() {
     }
     try {
       if (editMode) {
-        await UpdateSector({ sectorId: editingId, nombre: sectorName });
-        setModalOpen(false);
-        await Swal.fire({
-          icon: "success",
-          title: "Sector actualizado correctamente",
-          showConfirmButton: false,
-          timer: 2000,
+        const result = await UpdateSector({
+          sectorId: editingId,
+          nombre: sectorName,
         });
+        if (result.success) {
+          Swal.fire({
+            icon: "success",
+            title: "Sector actualizado correctamente",
+            showConfirmButton: false,
+            timer: 2000,
+          });
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: result.message,
+            showConfirmButton: false,
+            timer: 2000,
+          });
+        }
       } else {
-        await PostSector({ nombre: sectorName });
+        const result = await PostSector({ nombre: sectorName });
         setModalOpen(false);
-        await Swal.fire({
-          icon: "success",
-          title: "Sector creado exitosamente",
-          showConfirmButton: false,
-          timer: 2000,
-        });
+
+        if (result.success) {
+          Swal.fire({
+            icon: "success",
+            title: "Sector creado exitosamente",
+            showConfirmButton: false,
+            timer: 2000,
+          });
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: result.message,
+            showConfirmButton: false,
+            timer: 2000,
+          });
+        }
       }
       setModalOpen(false);
       await loadSectors();
     } catch (e) {
-      console.error("Error al guardar sector", e);
       Swal.fire("Error", "No se pudo guardar el sector", "error");
     }
   };
+
+  const filtered = sectors.filter((item) =>
+    item.nombre.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const columns = [
     { Header: "Nombre del Sector", accessor: "name", align: "left" },
     { Header: "Acciones", accessor: "actions", align: "center" },
   ];
 
-  const rows = sectors.map((sector) => ({
+  const rows = filtered.map((sector) => ({
     name: (
       <MDTypography variant="caption" fontWeight="medium">
         {sector.nombre}
@@ -110,7 +142,7 @@ export default function SectorsIndexPage() {
         <Tooltip title="Editar sector">
           <IconButton
             size="small"
-            color="success"
+            sx={{ color: "#1976D2" }}
             onClick={() => handleEditClick(sector)}
           >
             <EditOutlined fontSize="small" />
@@ -127,58 +159,67 @@ export default function SectorsIndexPage() {
         <Grid container spacing={3} sx={{ mb: 5 }}>
           {/* Header */}
           <Grid size={{ xs: 12 }}>
-            <Card
+            <MDBox
               sx={{
-                background: "#ffffff",
-                mb: 3,
                 borderRadius: 2,
+                p: 3,
+                mb: 2,
+                background: "#ffffff",
                 border: "1px solid #e5e7eb",
                 boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-                padding: 3,
               }}
             >
-              <CardContent>
-                <Grid
-                  container
-                  alignItems="center"
-                  justifyContent="space-between"
-                >
-                  <Grid>
-                    <MDBox display="flex" flexDirection="column" gap={1}>
-                      <MDBox display="flex" flexDirection="column">
-                        <MDBox display="flex" alignItems="center" gap={1}>
-                          <MDTypography variant="h6">Sectores</MDTypography>
-                        </MDBox>
-                        <MDBox display="flex" alignItems="center" gap={1}>
-                          <MDTypography variant="body2" color="text">
-                            Gestiona los sectores registrados dentro de la
-                            organización
-                          </MDTypography>
-                        </MDBox>
-                      </MDBox>
+              <Grid
+                container
+                alignItems="center"
+                justifyContent="space-between"
+              >
+                <Grid item>
+                  <MDBox display="flex" flexDirection="column">
+                    <MDBox display="flex" alignItems="center" gap={1}>
+                      <MDTypography variant="h6">Sectores</MDTypography>
                     </MDBox>
-                  </Grid>
-                  <Grid>
-                    <MDButton
-                      variant="outlined"
-                      onClick={handleAddSectorClick}
-                      startIcon={<AddOutlined />}
-                      sx={{
-                        borderColor: "#4CAF50",
-                        color: "#4CAF50",
-                        "&:hover": {
-                          backgroundColor: "#E8F5E9",
-                          borderColor: "#43A047",
-                          color: "#388E3C",
-                        },
-                      }}
-                    >
-                      Agregar Sector
-                    </MDButton>
-                  </Grid>
+                    <MDBox display="flex" alignItems="center" gap={1}>
+                      <MDTypography variant="body2" color="text">
+                        Gestiona los sectores registrados dentro del sistema.
+                      </MDTypography>
+                    </MDBox>
+                  </MDBox>
                 </Grid>
-              </CardContent>
-            </Card>
+                <Grid>
+                  <MDButton
+                    variant="outlined"
+                    onClick={handleAddSectorClick}
+                    startIcon={<AddOutlined />}
+                    sx={{
+                      borderColor: "#4CAF50",
+                      color: "#4CAF50",
+                      "&:hover": {
+                        backgroundColor: "#E8F5E9",
+                        borderColor: "#43A047",
+                        color: "#388E3C",
+                      },
+                    }}
+                  >
+                    Agregar Sector
+                  </MDButton>
+                </Grid>
+              </Grid>
+
+              <Grid container spacing={2} mt={1}>
+                <Grid xs={12} sm={6} md={4} lg={3}>
+                  <TextField
+                    fullWidth
+                    variant="outlined"
+                    placeholder="Buscar por nombre del sector..."
+                    size="large"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    sx={{ width: "230px", mb: 3 }}
+                  />
+                </Grid>
+              </Grid>
+            </MDBox>
           </Grid>
 
           {/* Tabla */}
@@ -203,8 +244,7 @@ export default function SectorsIndexPage() {
                 sx={{
                   p: 4,
                   textAlign: "center",
-                  minHeight: "100px",
-                  width: "1200px",
+                  width: "100%",
                   alignItems: "center",
                   justifyContent: "center",
                 }}
@@ -225,42 +265,53 @@ export default function SectorsIndexPage() {
       </MDBox>
 
       {/* Modal */}
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 400,
-            bgcolor: "background.paper",
-            boxShadow: 24,
-            p: 4,
-            borderRadius: 2,
-          }}
-        >
-          <MDTypography variant="h6" gutterBottom>
-            {editMode ? "Editar Sector" : "Agregar Nuevo Sector"}
-          </MDTypography>
-          <TextField
-            fullWidth
-            label="Nombre del Sector"
-            value={sectorName}
-            onChange={(e) => setSectorName(e.target.value)}
-            error={!!errors.name}
-            helperText={errors.name}
-            sx={{ mb: 2 }}
-          />
-          <MDButton
-            variant="gradient"
-            color="success"
-            onClick={handleSaveSector}
-            fullWidth
-          >
-            Guardar
-          </MDButton>
+      <Dialog
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        fullWidth
+        maxWidth="xs"
+      >
+        <Box sx={{}}>
+          <DialogTitle>
+            <MDBox
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+            >
+              <MDTypography variant="h5" gutterBottom>
+                {editMode ? "Editar Sector" : "Agregar Nuevo Sector"}
+              </MDTypography>
+              <IconButton onClick={() => setModalOpen(false)}>
+                <CloseIcon />
+              </IconButton>
+            </MDBox>
+          </DialogTitle>
+          <DialogContent dividers>
+            <TextField
+              fullWidth
+              label="Nombre del Sector"
+              value={sectorName}
+              onChange={(e) => {
+                setSectorName(e.target.value);
+                setErrors((prev) => ({ ...prev, name: "" }));
+              }}
+              error={!!errors.name}
+              helperText={errors.name}
+              sx={{ mb: 2 }}
+            />
+          </DialogContent>
+          <DialogActions>
+            <MDButton
+              variant="gradient"
+              color="success"
+              onClick={handleSaveSector}
+              fullWidth
+            >
+              Guardar
+            </MDButton>
+          </DialogActions>
         </Box>
-      </Modal>
+      </Dialog>
     </DashboardLayout>
   );
 }

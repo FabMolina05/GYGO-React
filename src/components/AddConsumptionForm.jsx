@@ -7,12 +7,11 @@ import {
   CircularProgress,
   TextField,
   Select,
-  Alert
+  Alert,
+  FormControl,
+  FormControlLabel,
 } from "@mui/material";
-import {
-  AddOutlined,
-  ErrorOutline,
-} from "@mui/icons-material";
+import { AddOutlined, ErrorOutline } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import MDButton from "components/MDButton";
 import MDInput from "components/MDInput";
@@ -20,7 +19,7 @@ import MDTypography from "components/MDTypography";
 import { getFactoresEmision } from "../API/FactorEmision";
 import { addConsumption } from "../API/Consumptions/Consumption";
 import Swal from "sweetalert2";
-
+import { FormControl } from "react-bootstrap";
 
 export function AddConsumptionForm() {
   const navigate = useNavigate();
@@ -55,7 +54,8 @@ export function AddConsumptionForm() {
   const validateForm = () => {
     const newErrors = {};
     if (!formData.name.trim()) newErrors.name = "El nombre es requerido";
-    if (!formData.factorEmisionId) newErrors.factorEmisionId = "Seleccione un factor";
+    if (!formData.factorEmisionId)
+      newErrors.factorEmisionId = "Seleccione un factor";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -78,7 +78,7 @@ export function AddConsumptionForm() {
         showConfirmButton: false,
         timer: 2000,
       });
-      navigate("/consumption");
+      navigate("/consumo");
     } catch (err) {
       console.error("Error al guardar:", err);
       setErrors({ submit: "Error al guardar. Intente de nuevo." });
@@ -97,7 +97,7 @@ export function AddConsumptionForm() {
       </MDTypography>
       <form onSubmit={handleSubmit}>
         <Grid container spacing={2}>
-          <Grid size={{xs:12}}>
+          <Grid size={{ xs: 12 }}>
             <TextField
               label="Nombre *"
               name="name"
@@ -109,41 +109,45 @@ export function AddConsumptionForm() {
             />
           </Grid>
 
-          <Grid size={{xs:12}}>
+          <Grid size={{ xs: 12 }}>
             {loading ? (
               <CircularProgress size={24} />
             ) : (
-              <Select
-              sx={{height: 40}}
-                name="factorEmisionId"
-                label="Factor de Emisión *"
-                fullWidth
-                value={formData.factorEmisionId}
-                onChange={handleChange}
-                error={!!errors.factorEmisionId}
-                helperText={errors.factorEmisionId}
-              >
-                <MenuItem value="">Seleccione un factor</MenuItem>
-                {factoresEmision.map((f) => (
-                  <MenuItem key={f.id} value={f.id}>
-                    {f.name} ({f.unitCarbono})
-                  </MenuItem>
-                ))}
-              </Select>
+              <FormControl>
+                <InputLabel id="factor-emision-label">
+                  Factor de Emisión *
+                </InputLabel>
+                <Select
+                  sx={{ height: 40 }}
+                  name="factorEmisionId"
+                  labelId="factor-emision-label"
+                  label="Factor de Emisión *"
+                  fullWidth
+                  value={formData.factorEmisionId}
+                  onChange={handleChange}
+                  error={!!errors.factorEmisionId}
+                  helperText={errors.factorEmisionId}
+                >
+                  <MenuItem value="">Seleccione un factor</MenuItem>
+                  {factoresEmision.map((f) => (
+                    <MenuItem key={f.id} value={f.id}>
+                      {f.name} ({f.unitCarbono})
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             )}
           </Grid>
 
-          
-
           {errors.submit && (
-            <Grid size={{xs:12}}>
+            <Grid size={{ xs: 12 }}>
               <Alert severity="error" icon={<ErrorOutline />}>
                 {errors.submit}
               </Alert>
             </Grid>
           )}
 
-          <Grid size={{xs:12}}>
+          <Grid size={{ xs: 12 }}>
             <MDButton
               type="submit"
               variant="gradient"

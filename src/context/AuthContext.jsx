@@ -1,68 +1,90 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import { refreshLogin } from "../API/Auth";
-
+import { useNavigate } from 'react-router-dom';
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [role, setRole] = useState(() => localStorage.getItem("userRole"));
-  const [userId, setUserId] = useState(() => localStorage.getItem("userId") || null);
+  const [role, setRole] = useState(() => sessionStorage.getItem("userRole"));
+  const [userId, setUserId] = useState(() => sessionStorage.getItem("userId") || null);
+  const [userGroup, setUserGroup] = useState(() => sessionStorage.getItem("userGroup") || null); // ← AGREGAR
   const [hasPaidGroupAdminAccess, setHasPaidGroupAdminAccess] = useState(false);
+  
+  const navigate = useNavigate(); 
 
-  const login = (newRole, id) => {
-    console.log("Guardando rol en contexto:", newRole);
+
+
+  const login = (newRole, id, groupId = null) => { // ← Agregar groupId opcional
+    
     setRole(newRole);
     setUserId(id);
-    localStorage.setItem("userRole", newRole);
-    localStorage.setItem("userId", id);
+    setUserGroup(groupId); // ← AGREGAR
+    sessionStorage.setItem("userRole", newRole);
+    sessionStorage.setItem("userId", id);
+    if (groupId) {
+      sessionStorage.setItem("userGroup", groupId); // ← AGREGAR
+    }
   };
 
   const logoutRol = () => {
     setRole(null);
     setUserId(null);
-    localStorage.removeItem("userRole");
-    localStorage.removeItem("userId");
+    setUserGroup(null); // ← AGREGAR
+    sessionStorage.removeItem("userRole");
+    sessionStorage.removeItem("userId");
+    sessionStorage.removeItem("userGroup"); // ← AGREGAR
+    sessionStorage.clear();    
   };
 
   const refreshUserData = async () => {
     try {
       const data = await refreshLogin();
+      
+      
       if (data?.user?.role && data?.user?.id) {
         setRole(data.user.role);
         setUserId(data.user.id);
-        setUserGroup(data.user.groupId);
-        localStorage.setItem("userRole", data.user.role);
-        localStorage.setItem("userId", data.user.id);
-        localStorage.setItem("userGroup", data.user.groupId);
+        setUserGroup(data.user.groupId); // ← Ahora sí existe
+        
+        sessionStorage.setItem("userRole", data.user.role);
+        sessionStorage.setItem("userId", data.user.id);
+        
+        if (data.user.groupId) { // ← Solo guardar si existe
+          sessionStorage.setItem("userGroup", data.user.groupId);
+        }
+        
+        return true; // ← Indicar éxito
       } else {
         console.error("No se pudo refrescar el usuario:", data);
+        return false; // ← Indicar fallo
       }
     } catch (error) {
       console.error("Error al refrescar el login:", error);
+      return false; // ← Indicar fallo
     }
   };
+
   const markUserAsPaid = () => {
     setHasPaidGroupAdminAccess(true);
   };
 
   const updateRole = (newRole) => {
     setRole(newRole);
-    localStorage.setItem("userRole", newRole);
+    sessionStorage.setItem("userRole", newRole);
   };
- 
 
   return (
     <AuthContext.Provider
       value={{
         role,
         userId,
+        userGroup, // ← AGREGAR
         hasPaidGroupAdminAccess,
         login,
         logoutRol,
         refreshUserData,
         markUserAsPaid,
-        updateRole,
-        
-      }}
+        updateRole
+            }}
     >
       {children}
     </AuthContext.Provider>

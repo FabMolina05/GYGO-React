@@ -174,7 +174,7 @@ export const PrivateHeader = () => {
               <ul className="nav-list">
                 <li>
                   <a href="/ProjectsPage" onClick={closeMenu}>
-                    Projectos
+                    Proyectos
                   </a>
                 </li>
                 <li>

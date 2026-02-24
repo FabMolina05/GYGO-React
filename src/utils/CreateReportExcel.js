@@ -1,7 +1,7 @@
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
-export const exportToExcel = (labels, emissions) => {
+export const exportToExcel = (labels, emissions, labelTitle) => {
   if (labels.length === 0 || emissions.length === 0) {
     alert("No hay datos para exportar");
     return;
@@ -13,7 +13,7 @@ export const exportToExcel = (labels, emissions) => {
     ["Reporte de Emisiones de CO₂", ""],
     [`Generado el ${fecha}`, ""],
     [],
-    ["Periodo", "Emisiones (kg CO₂)"],
+    [labelTitle, "Emisiones (kg CO₂)"],
     ...labels.map((label, index) => [label, emissions[index]])
   ];
 

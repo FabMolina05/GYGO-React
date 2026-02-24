@@ -6,7 +6,14 @@ import Card from "@mui/material/Card";
 import Grid from "@mui/material/Grid";
 import DataTable from "examples/Tables/DataTable"; // Asegúrate que apunte al mismo DataTable que usas en Projects
 
-export function ConsumptionTable({ consumos, loading, onVerConsumoMensual, onEditarConsumo }) {
+export function ConsumptionTable({
+  consumos,
+  loading,
+  onVerConsumoMensual,
+  onEditarConsumo,
+}) {
+
+  
   const columns = [
     { Header: "Nombre Consumo", accessor: "name", align: "left" },
     { Header: "Nombre Factor", accessor: "factorName", align: "left" },
@@ -21,23 +28,19 @@ export function ConsumptionTable({ consumos, loading, onVerConsumoMensual, onEdi
       </MDTypography>
     ),
     factorName: (
-      <MDTypography variant="caption" color="text" sx={{color: "#495057"}}>
+      <MDTypography variant="caption" color="text" sx={{ color: "#495057" }}>
         {consumo.factorName}
       </MDTypography>
     ),
     unit: (
-      <MDTypography variant="caption" color="text" sx={{color: "#495057"}}>
+      <MDTypography variant="caption" color="text" sx={{ color: "#495057" }}>
         {consumo.unitAbbreviation}
       </MDTypography>
     ),
     actions: (
       <Stack direction="row" spacing={1} justifyContent="center">
         <Tooltip title="Ver Consumo Mensual">
-          <IconButton
-            size="small"
-            
-            onClick={() => onVerConsumoMensual(consumo)}
-          >
+          <IconButton size="small" onClick={() => onVerConsumoMensual(consumo)}>
             <RemoveRedEyeOutlined fontSize="small" />
           </IconButton>
         </Tooltip>
@@ -55,11 +58,20 @@ export function ConsumptionTable({ consumos, loading, onVerConsumoMensual, onEdi
   }));
 
   return (
-    <MDBox >
+    <MDBox>
       <Grid container spacing={5}>
         <Grid size={{ xs: 12 }}>
           <Card>
-            <MDBox pt={3}>
+            <MDBox
+              pt={3}
+              sx={{
+                p: 3,
+                textAlign: "center",
+                width: "100%",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
               <DataTable
                 table={{ columns, rows }}
                 isSorted={false}

@@ -1,12 +1,16 @@
 import { useState, useEffect, useMemo } from "react";
-
+import CloseIcon from "@mui/icons-material/Close";
 // Material Dashboard 2 React example components
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import Footer from "examples/Footer";
 import DataTable from "examples/Tables/DataTable";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import EmissionFactorModal from "../../components/EmisionFactorForm";
-
+import {
+  AddOutlined,
+  EditOutlined,
+  DeleteOutlineOutlined,
+} from "@mui/icons-material";
 import {
   getMeasurementUnits,
   getSectors,
@@ -57,19 +61,20 @@ const EmissionFactorDashboard = () => {
   const [sources, setSources] = useState([]);
   const [pcgs, setPcgs] = useState([]);
 
+  const fetchEmissionFactors = async () => {
+    try {
+      setLoading(true);
+      const factors = await getEmissionFactors();
+      setEmissionFactors(factors);
+    } catch (err) {
+      console.error("Error loading emission factors:", err);
+      setError("Failed to load emission factors.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchEmissionFactors = async () => {
-      try {
-        setLoading(true);
-        const factors = await getEmissionFactors();
-        setEmissionFactors(factors);
-      } catch (err) {
-        console.error("Error loading emission factors:", err);
-        setError("Failed to load emission factors.");
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchEmissionFactors();
   }, []);
 
@@ -104,7 +109,6 @@ const EmissionFactorDashboard = () => {
         setSectors(sectors);
         setSources(sources);
         setPcgs(pcgs);
-        
       } catch (err) {
         console.error(err);
         setError("Failed to load reference data");
@@ -180,9 +184,23 @@ const EmissionFactorDashboard = () => {
       setEmissionFactors((prev) =>
         prev.filter((f) => f.id !== deleteConfirmation.id)
       );
+
+      Swal.fire({
+        icon: "success",
+        title: "Eliminado",
+        text: "El factor de emisión se eliminó correctamente.",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+
       setDeleteConfirmation(null);
     } catch (error) {
       console.error("Error deleting emission factor:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Hubo un problema al eliminar el factor de emisión.",
+      });
     }
   };
 
@@ -197,19 +215,45 @@ const EmissionFactorDashboard = () => {
       }
 
       if (success) {
-        if (editingFactor) {
-          setEmissionFactors((prev) =>
-            prev.map((f) => (f.id === editingFactor.id ? formData : f))
-          );
-        } else {
-          setEmissionFactors((prev) => [...prev, formData]);
-        }
+        Swal.fire({
+          icon: "success",
+          title: editingFactor
+            ? "Factor de emisión actualizado"
+            : "Factor de emisión agregado",
+          text: editingFactor
+            ? "El factor de emisión se actualizó correctamente."
+            : "El nuevo factor de emisión se agregó correctamente.",
+          showConfirmButton: false,
+          timer: 2000,
+        });
         setIsModalOpen(false);
+        await fetchEmissionFactors();
+        // if (editingFactor) {
+        //   setEmissionFactors((prev) =>
+        //     prev.map((f) => (f.id === editingFactor.id ? formData : f))
+        //   );
+        // } else {
+        //   setEmissionFactors((prev) => [...prev, formData]);
+        // }
+        // setIsModalOpen(false);
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error al guardar",
+          text: "No se pudo guardar el factor de emisión. Intenta nuevamente.",
+          showConfirmButton: false,
+          timer: 2000,
+        });
       }
-
-      window.location.reload();
     } catch (error) {
       console.error("Error al guardar:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error inesperado",
+        text: "Ocurrió un error al intentar guardar el factor de emisión. Revise los datos ingresados.",
+        showConfirmButton: false,
+        timer: 2000,
+      });
     }
   };
 
@@ -283,7 +327,7 @@ const EmissionFactorDashboard = () => {
             color="info"
             onClick={() => handleEdit(factor)}
           >
-            <EditIcon fontSize="small" />
+            <EditOutlined fontSize="small" />
           </IconButton>
         </Tooltip>
         <Tooltip title="Eliminar">
@@ -292,7 +336,7 @@ const EmissionFactorDashboard = () => {
             color="error"
             onClick={() => handleDelete(factor)}
           >
-            <DeleteIcon fontSize="small" />
+            <DeleteOutlineOutlined fontSize="small" />
           </IconButton>
         </Tooltip>
       </Stack>
@@ -305,11 +349,14 @@ const EmissionFactorDashboard = () => {
       <MDBox py={3}>
         <MDBox mb={2}>
           <MDBox
-            borderRadius="xl"
-            border="1px solid #ccc"
-            p={3}
-            mb={2}
-            bgColor="white"
+            sx={{
+              borderRadius: 2,
+              p: 3,
+              mb: 2,
+              background: "#ffffff",
+              border: "1px solid #e5e7eb",
+              boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+            }}
           >
             <Grid
               container
@@ -319,12 +366,12 @@ const EmissionFactorDashboard = () => {
             >
               <Grid>
                 <MDBox display="flex" alignItems="center" gap={1}>
-                  <FilterAltOutlinedIcon fontSize="medium" />
-                  <MDTypography variant="h6">Filtros y Acciones</MDTypography>
+                 
+                  <MDTypography variant="h6">Factores de Emisión</MDTypography>
                 </MDBox>
                 <MDBox display="flex" alignItems="center" gap={1}>
                   <MDTypography variant="body2" color="text">
-                    Gestiona los factores de emisión registrados dentro de la organización
+                    Administra y supervisa los factores de emisión registrados en la organización.
                   </MDTypography>
                 </MDBox>
               </Grid>
@@ -332,6 +379,7 @@ const EmissionFactorDashboard = () => {
               <Grid>
                 <MDButton
                   variant="outlined"
+                  startIcon={<AddOutlined />}
                   sx={{
                     borderColor: "#4CAF50",
                     color: "#4CAF50",
@@ -343,7 +391,7 @@ const EmissionFactorDashboard = () => {
                   }}
                   onClick={handleCreate}
                 >
-                  Crear Nuevo
+                  Agregar Factor Emisión
                 </MDButton>
               </Grid>
             </Grid>
@@ -365,7 +413,7 @@ const EmissionFactorDashboard = () => {
 
           <MDBox pt={6} pb={3}>
             <Grid container spacing={6}>
-              <Grid size={{xs: 12}}>
+              <Grid size={{ xs: 12 }}>
                 <Card>
                   <MDBox
                     mx={2}
@@ -381,37 +429,23 @@ const EmissionFactorDashboard = () => {
                       Factores de Emisión
                     </MDTypography>
                   </MDBox>
-                  <MDBox pt={3}>
-                    {filteredFactors.length === 0 ? (
-                      <Card
-                        sx={{
-                          p: 4,
-                          textAlign: "center",
-                          minHeight: "100px",
-                          width: "1200px",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <MDTypography
-                          variant="h6"
-                          color="text"
-                          fontWeight="regular"
-                        >
-                          {searchTerm
-                            ? "No se encontraron factores de emisión que coincidan con la búsqueda."
-                            : "No hay factores de emisión registrados aún."}
-                        </MDTypography>
-                      </Card>
-                    ) : (
-                      <DataTable
-                        table={{ columns, rows }}
-                        isSorted={false}
-                        entriesPerPage={false}
-                        showTotalEntries={true}
-                        noEndBorder
-                      />
-                    )}
+                  <MDBox
+                    pt={3}
+                    sx={{
+                      p: 4,
+                      textAlign: "center",
+                      width: "100%",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <DataTable
+                      table={{ columns, rows }}
+                      isSorted={false}
+                      entriesPerPage={false}
+                      showTotalEntries={true}
+                      noEndBorder
+                    />
                   </MDBox>
                 </Card>
               </Grid>
@@ -439,8 +473,19 @@ const EmissionFactorDashboard = () => {
         open={Boolean(deleteConfirmation)}
         onClose={() => setDeleteConfirmation(null)}
       >
-        <DialogTitle>Confirmar eliminación</DialogTitle>
-        <DialogContent>
+        <DialogTitle>
+          <MDBox
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <MDTypography variant="h5"> Confirmar eliminación</MDTypography>
+            <IconButton onClick={() => setDeleteConfirmation(null)}>
+              <CloseIcon />
+            </IconButton>
+          </MDBox>
+        </DialogTitle>
+        <DialogContent dividers>
           <p>
             ¿Estás seguro de que deseas eliminar "{deleteConfirmation?.name}"?
             <br />

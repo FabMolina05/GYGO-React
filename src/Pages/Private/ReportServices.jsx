@@ -115,19 +115,27 @@ export function ReportServices() {
       <MDBox py={3}>
         <MDBox mb={2}>
           <MDBox
-            borderRadius="xl"
-            border="1px solid #ccc"
-            p={3}
-            mb={2}
-            bgColor="white"
+            sx={{
+              borderRadius: 2,
+              p: 3,
+              mb: 2,
+              background: "#ffffff",
+              border: "1px solid #e5e7eb",
+              boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+            }}
           >
             <Grid container alignItems="center" justifyContent="space-between">
               <Grid item>
                 <MDBox display="flex" flexDirection="column">
                   <MDBox display="flex" alignItems="center" gap={1}>
-                    <FilterAltOutlinedIcon fontSize="medium" />
-                    <MDTypography variant="h6">Reportes</MDTypography>
+                    <MDTypography variant="h6">
+                      Reporte de Servicios
+                    </MDTypography>
                   </MDBox>
+                  <MDTypography variant="body2" color="text">
+                    Visualiza la cantidad de empresas que utilizan cada servicio
+                    del sistema.
+                  </MDTypography>
                 </MDBox>
               </Grid>
               <Grid item></Grid>

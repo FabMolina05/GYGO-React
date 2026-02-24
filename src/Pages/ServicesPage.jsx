@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { TextField, Grid, Box, Card, IconButton } from "@mui/material";
+import { TextField, Grid, Box, Card, IconButton,FormControl,InputLabel,Select,MenuItem } from "@mui/material";
 import Footer from "examples/Footer";
 import DashboardLayout from "../examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "../examples/Navbars/DashboardNavbar";
@@ -8,11 +8,12 @@ import MDTypography from "../components/MDTypography";
 import DataTable from "../examples/Tables/DataTable";
 import { GetServices } from "../API/Reports";
 import { useAuth } from "../context/AuthContext";
-import CancelIcon from "@mui/icons-material/Cancel";
+import BlockOutlined from "@mui/icons-material/DisabledByDefaultOutlined";
 import SuperAdminCancelModal from "../components/SuperAdminCancelModal";
 import { cancelAdminSubscription } from "../API/Subscription";
 import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 import Tooltip from "@mui/material/Tooltip";
+
 export default function ServicesPage() {
   const [services, setServices] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -20,6 +21,7 @@ export default function ServicesPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState(null);
   const { userId, role } = useAuth();
+  const [selectedGroupFilter, setSelectedGroupFilter] = useState("todos");
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -40,19 +42,27 @@ export default function ServicesPage() {
   }, []);
 
   useEffect(() => {
-    if (!searchTerm) {
-      setTableRows(services);
-    } else {
-      const filtered = services.filter((item) => {
-        const term = searchTerm.toLowerCase();
-        return (
+    let filtered = services;
+
+    if (selectedGroupFilter !== "todos") {
+      filtered = filtered.filter(
+        (item) => item.groupName === selectedGroupFilter
+      );
+    }
+
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(
+        (item) =>
           item.serviceName.toLowerCase().includes(term) ||
           item.groupName.toLowerCase().includes(term)
-        );
-      });
-      setTableRows(filtered);
+      );
     }
-  }, [searchTerm, services]);
+
+    setTableRows(filtered);
+  }, [searchTerm, selectedGroupFilter, services]);
+
+  const gruposUnicos = [...new Set(services.map((s) => s.groupName))];
 
   // Update columns to include actions
   const columns = [
@@ -72,7 +82,7 @@ export default function ServicesPage() {
               }}
               size="small"
             >
-              <CancelIcon fontSize="medium" />
+              <BlockOutlined fontSize="medium" />
             </IconButton>
           </Tooltip>
         ),
@@ -111,11 +121,14 @@ export default function ServicesPage() {
       <MDBox py={3}>
         <MDBox mb={2}>
           <MDBox
-            borderRadius="xl"
-            border="1px solid #ccc"
-            p={3}
-            mb={2}
-            bgColor="white"
+            sx={{
+              borderRadius: 2,
+              p: 3,
+              mb: 2,
+              background: "#ffffff",
+              border: "1px solid #e5e7eb",
+              boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+            }}
           >
             <Grid
               container
@@ -123,13 +136,15 @@ export default function ServicesPage() {
               justifyContent="space-between"
               spacing={2}
             >
-              <Grid>
-                <MDBox display="flex" alignItems="center" gap={1}>
-                  <FilterAltOutlinedIcon fontSize="medium" />
-                  <MDTypography variant="h6">Filtros y Acciones</MDTypography>
+              <Grid item>
+                <MDBox display="flex" flexDirection="column">
+                  <MDBox display="flex" alignItems="center" gap={1}>
+                    <MDTypography variant="h6">
+                      Empresas Registradas
+                    </MDTypography>
+                  </MDBox>
                   <MDTypography variant="body2" color="text">
-                    Gestiona los servicios de las empresas dentro de la
-                    organización
+                    Gestiona y visualiza las empresas que utilizan el sistema.
                   </MDTypography>
                 </MDBox>
               </Grid>
@@ -138,22 +153,43 @@ export default function ServicesPage() {
             </Grid>
 
             <Grid container spacing={2} mt={1}>
-              <Grid xs={12} sm={6} md={4} lg={3}>
+              {/* <Grid xs={12} sm={6} md={4} lg={3}>
                 <TextField
-                  label="Buscar servicios"
-                  variant="outlined"
                   fullWidth
+                  variant="outlined"
+                  placeholder="Buscar por nombre de empresa..."
+                  size="large"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   sx={{ width: "200px", mb: 3 }}
                 />
+              </Grid> */}
+
+             <Grid sx={{ pt: 1 }}>
+                <FormControl fullWidth>
+                  <InputLabel id="group-filter-label">Filtrar por grupo</InputLabel>
+                  <Select
+                    labelId="group-filter-label"
+                    value={selectedGroupFilter}
+                    label="Filtrar por grupo"
+                    onChange={(e) => setSelectedGroupFilter(e.target.value)}
+                    sx={{ width: 200, height: 40 }}
+                  >
+                    <MenuItem value="todos">Todos</MenuItem>
+                    {gruposUnicos.map((g, i) => (
+                      <MenuItem key={i} value={g}>
+                        {g}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               </Grid>
             </Grid>
           </MDBox>
 
           <MDBox pt={6} pb={3}>
             <Grid container spacing={6}>
-              <Grid size={{xs:12}}>
+              <Grid size={{ xs: 12 }}>
                 <Card>
                   <MDBox
                     mx={2}
@@ -173,12 +209,11 @@ export default function ServicesPage() {
                     <MDBox
                       pt={3}
                       sx={{
+                        p: 4,
+                        textAlign: "center",
                         width: "100%",
-                        overflowX: "auto",
-                        "& table": {
-                          width: "100%",
-                          tableLayout: "fixed",
-                        },
+                        alignItems: "center",
+                        justifyContent: "center",
                       }}
                     >
                       <DataTable

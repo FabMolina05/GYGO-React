@@ -60,14 +60,14 @@ export const ModernDashboardCards = ({role}) => {
   }
 
   const handleVerConsumos = () => {
-    navigate("/consumption")
+    navigate("/consumo")
   }
   const handleVerProyecto = () => {
-    navigate("/projectPage")
+    navigate("/proyectos")
   }
 
   const handleVerReportes = ( ) =>{
-    navigate("/reportsEmissions")
+    navigate("/reportes-emisiones")
   }
   const { groupName, projects, consumptions, hasProjects, hasConsumption } = data
 
@@ -180,7 +180,7 @@ export const ModernDashboardCards = ({role}) => {
                   variant="outlined"
                   fullWidth
                   startIcon={<Assessment />}
-                  onClick={() => navigate("/groupProfile")}
+                  onClick={() => navigate("/perfil")}
                   sx={{
                     py: 1.5,
                     borderRadius: 1.5,
@@ -230,7 +230,7 @@ export const ModernDashboardCards = ({role}) => {
       <Grid size={{xs:12, lg:5}}>
         <Card
           sx={{
-            height: 400, // Altura fija
+            height: 520, // Altura fija
             background: "#ffffff",
             borderRadius: 2,
             boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
@@ -325,7 +325,7 @@ export const ModernDashboardCards = ({role}) => {
       <Grid size={{xs:12, lg:7}}>
         <Card
           sx={{
-            height: 400, // Altura fija
+            height: 520, // Altura fija
             background: "#ffffff",
             borderRadius: 2,
             boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",

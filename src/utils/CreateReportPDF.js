@@ -1,7 +1,7 @@
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 
-export const exportChartToPDF = (chartRef, labels, emissions) => {
+export const exportChartToPDF = (chartRef, labels, emissions, labelTitle) => {
   const chart = chartRef.current;
 
   if (!chart) {
@@ -41,7 +41,7 @@ export const exportChartToPDF = (chartRef, labels, emissions) => {
 
   autoTable(pdf, {
     startY: 40 + imgHeight + 10,
-    head: [["Mes", "Emisiones (kg CO2)"]],
+    head: [[labelTitle, "Emisiones (kg CO2)"]],
     body: tableData,
     styles: {
       halign: "center"

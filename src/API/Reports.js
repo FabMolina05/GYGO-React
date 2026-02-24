@@ -1,4 +1,5 @@
 import { appsettings } from "../settings/appsettings";
+import { fetchWithAuth } from "../utils/fetchWithAuth";
 
 export async function getReportCompanies({
   status = null,
@@ -14,11 +15,13 @@ export async function getReportCompanies({
   }
 
   const url = `${appsettings.apiUrl}Reports/AllCompanies${params.toString() ? `?${params}` : ""}`;
-  const response = await fetch(url, {
-      method: 'GET',
-      credentials: 'include', 
-      headers: { Accept: 'application/json' }
-    });
+  const response = await fetchWithAuth(url, {
+    method: "GET",
+    credentials: "include",
+    headers: { Accept: "application/json" },
+  });
+
+  if (!response) return;
 
   if (response.ok) {
     const data = await response.json();
@@ -29,14 +32,18 @@ export async function getReportCompanies({
 }
 
 export async function GetServices() {
-  const response = await fetch(`${appsettings.apiUrl}Services/GetServices`
+  const response = await fetchWithAuth(
+    `${appsettings.apiUrl}Services/GetServices`,
 
-    , {
-      method: 'GET',
-      credentials: 'include', 
-      headers: { Accept: 'application/json' }
+    {
+      method: "GET",
+      credentials: "include",
+      headers: { Accept: "application/json" },
     }
   );
+
+  if (!response) return;
+
   if (response.ok) {
     const data = await response.json();
     return data;
@@ -44,17 +51,18 @@ export async function GetServices() {
     return [];
   }
 }
-
-
 
 export async function GetReportsGroupsByService() {
-  const response = await fetch(`${appsettings.apiUrl}Reports/ServicesGroupByService`
-    , {
-      method: 'GET',
-      credentials: 'include', 
-      headers: { Accept: 'application/json' }
+  const response = await fetchWithAuth(
+    `${appsettings.apiUrl}Reports/ServicesGroupByService`,
+    {
+      method: "GET",
+      credentials: "include",
+      headers: { Accept: "application/json" },
     }
   );
+  if (!response) return;
+
   if (response.ok) {
     const data = await response.json();
     return data;
@@ -63,13 +71,16 @@ export async function GetReportsGroupsByService() {
   }
 }
 
-
 export async function GetReportsGroupsDetails() {
-  const response = await fetch(`${appsettings.apiUrl}Reports/GetGropusDetails`, {
-      method: 'GET',
-      credentials: 'include', 
-      headers: { Accept: 'application/json' }
-    });
+  const response = await fetchWithAuth(
+    `${appsettings.apiUrl}Reports/GetGropusDetails`,
+    {
+      method: "GET",
+      credentials: "include",
+      headers: { Accept: "application/json" },
+    }
+  );
+  if (!response) return;
   if (response.ok) {
     const data = await response.json();
     return data;

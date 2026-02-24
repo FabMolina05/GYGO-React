@@ -15,13 +15,13 @@ const Footer = () => {
             <h4>Servicios</h4>
             <ul>
               <li>
-                <a onClick={() => handleMenuClick("/servicios")}>Auditoría Ambiental</a>
+                <a href="#" onClick={() => handleMenuClick("/servicios")}>Auditoría Ambiental</a>
               </li>
               <li>
-                <a onClick={() => handleMenuClick("/nosotros")}>Sobre Nosotros</a>
+                <a href="#" onClick={() => handleMenuClick("/nosotros")}>Sobre Nosotros</a>
               </li>
               <li>
-                <a onClick={() => handleMenuClick("/contactos")}>Paquetes</a>
+                <a href="#" onClick={() => handleMenuClick("/contactos")}>Paquetes</a>
               </li>
 
             </ul>
@@ -31,16 +31,16 @@ const Footer = () => {
             <h4>Certificaciones</h4>
             <ul>
               <li>
-                <a href="#iso14001">Certificaciones disponibles</a>
+                <a href="/certificaciones">Certificaciones disponibles</a>
               </li>
               <li>
-                <a href="https://www.ict.go.cr/es/sostenibilidad/bandera-azul.html">Bandera Azul</a>
+                <a href="https://www.ict.go.cr/es/sostenibilidad/bandera-azul.html" target="_blank">Bandera Azul</a>
               </li>
               <li>
-                <a href="https://cambioclimatico.minae.go.cr/programa-pais-carbono-neutralidad/">Carbono Neutral</a>
+                <a href="https://cambioclimatico.minae.go.cr/programa-pais-carbono-neutralidad/" target="_blank" >Carbono Neutral</a>
               </li>
               <li>
-                <a href="https://www.esencialcostarica.com/quienes-somos/">Esencial Costa Rica</a>
+                <a href="https://www.esencialcostarica.com/quienes-somos/" target="_blank">Esencial Costa Rica</a>
               </li>
             </ul>
           </div>

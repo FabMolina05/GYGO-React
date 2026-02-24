@@ -14,7 +14,7 @@ import typography from "assets/theme/base/typography";
 function Footer({
   company = { href: "#", name: "Get Your Green On" },
   links = [
-    { href: "/contacto", name: "Contacto" },
+    { href: "/contacto", name: "Contacto0" },
     { href: "https://www.facebook.com/", name: "Facebook" },
     { href: "https://www.instagram.com/", name: "Instagram" },
     { href: "https://www.linkedin.com/", name: "LinkedIn" },
@@ -40,7 +40,7 @@ function Footer({
       width="100%"
       display="flex"
       flexDirection={{ xs: "column", lg: "row" }}
-      justifyContent="space-between"
+      justifyContent="center"
       alignItems="center"
       px={1.5}
     >
@@ -71,16 +71,12 @@ function Footer({
           },
         })}
       >
-        {renderLinks()}
+        
       </MDBox>
     </MDBox>
   );
 }
 
-// Typechecking props for the Footer
-Footer.propTypes = {
-  company: PropTypes.objectOf(PropTypes.string),
-  links: PropTypes.arrayOf(PropTypes.object),
-};
+
 
 export default Footer;

@@ -55,7 +55,7 @@ export function MonthlyConsumptionPage() {
   const [abbreviation, setAbbreviation] = useState("");
 
    const handleAddMonthlyConsumption = () => {
-    navigate(`/consumption/monthly/add/${id}`);
+    navigate(`/consumo/mensual/agregar/${id}`);
   };
 
   useEffect(() => {
@@ -63,7 +63,9 @@ export function MonthlyConsumptionPage() {
       setLoading(true);
       const result = await getMonthlyConsumptions(id);
       setConsumosMensuales(result);
-      setAbbreviation(result[0].unitAbbreviation);    
+      if(result.length > 0 ){        
+        setAbbreviation(result[0].unitAbbreviation);    
+      }
       setLoading(false);
     };
     fetchMonthlyConsumption();
@@ -125,7 +127,7 @@ export function MonthlyConsumptionPage() {
                     variant="text"
                     color="black"
                     startIcon={<ArrowBackOutlined />}
-                    onClick={() => navigate("/consumption")}
+                    onClick={() => navigate("/consumo")}
                     sx={{ minWidth: "100%" }}
                   >
                     Volver

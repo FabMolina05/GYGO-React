@@ -21,6 +21,7 @@ export default function AdminSubscriptionEditor() {
   const [subscription, setSubscription] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
 
   useEffect(() => {
     const fetchSubscription = async () => {
@@ -58,6 +59,20 @@ export default function AdminSubscriptionEditor() {
         return "pending";
     }
   };
+
+  const getStatusLabel = (status) => {
+    switch (status?.toLowerCase()) {
+      case "active":
+        return "Activo";
+      case "cancelled":
+        return "Cancelada";
+      case "pending":
+        return "Pendiente";
+      default:
+        return status;
+    }
+  };
+
   if (loading) {
     return (
       <div className="subscription-details-container">
@@ -127,7 +142,7 @@ export default function AdminSubscriptionEditor() {
                   <div
                     className={`subscription-status ${getStatusClass(subscription.status)}`}
                   >
-                    {subscription.status}
+                    {getStatusLabel(subscription.status)}
                   </div>
                 </Box>
               </div>
@@ -185,24 +200,21 @@ export default function AdminSubscriptionEditor() {
                   width: "100%",
                 }}
               >
-                <CancelSubscriptionButton
-                  userId={subscription.userId}
-                  subscriptionId={subscription.payPalSubscriptionId}
-                  onSuccess={() => {
-                    console.log("Cancelación exitosa");
-                    window.location.reload();
-                  }}
-                />
+                {subscription.status !== "Cancelled" && (
+                  <CancelSubscriptionButton
+                    userId={subscription.userId}
+                    subscriptionId={subscription.payPalSubscriptionId}
+                    onSuccess={() => {
+                      console.log("Cancelación exitosa");
+                      window.location.reload();
+                    }}
+                  />
+                )}
               </div>
             </div>
           </div>
           <div className="Historial">
             <PaymentHistoryTable />
-          </div>
-          <div className="webhook-section">
-            <WebhookTestButtons
-              paypalSubscriptionId={subscription.payPalSubscriptionId}
-            />
           </div>
         </div>
       </div>

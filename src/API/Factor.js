@@ -1,35 +1,37 @@
-
-const API_BASE_URL = "https://localhost:7217"
+const API_BASE_URL = "https://localhost:7217";
 import { appsettings } from "../settings/appsettings";
-
+import { fetchWithAuth } from "../utils/fetchWithAuth";
 
 export const createEmissionFactor = async (emissionFactorData) => {
-
-  const response = await fetch(`${appsettings.apiUrl}Factor/create`, {
+  const response = await fetchWithAuth(`${appsettings.apiUrl}Factor/create`, {
     method: "POST",
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      "Accept": "application/json"
+      Accept: "application/json",
     },
-    body: JSON.stringify(emissionFactorData)
+    body: JSON.stringify(emissionFactorData),
   });
+
+  if (!response) return;
 
   if (!response.ok) {
     throw new Error(`Failed to create emission factor: ${response.statusText}`);
   }
-  
+
   return true;
 };
 
 export const getEmissionFactors = async () => {
-  const response = await fetch(`${appsettings.apiUrl}Factor/getAll`, {
+  const response = await fetchWithAuth(`${appsettings.apiUrl}Factor/getAll`, {
     method: "GET",
     credentials: "include",
     headers: {
-      "Accept": "application/json"
-    }
+      Accept: "application/json",
+    },
   });
+
+  if (!response) return;
 
   if (!response.ok) {
     throw new Error(`Failed to fetch emission factors: ${response.statusText}`);
@@ -40,17 +42,17 @@ export const getEmissionFactors = async () => {
 };
 
 export const updateEmissionFactor = async (data) => {
-
-
-  const response = await fetch(`${appsettings.apiUrl}Factor/update`, {
+  const response = await fetchWithAuth(`${appsettings.apiUrl}Factor/update`, {
     method: "PUT",
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      "Accept": "application/json",
+      Accept: "application/json",
     },
     body: JSON.stringify(data),
   });
+
+  if (!response) return;
 
   if (!response.ok) {
     throw new Error(`Failed to update emission factor: ${response.statusText}`);
@@ -60,13 +62,18 @@ export const updateEmissionFactor = async (data) => {
 };
 
 export const deleteEmissionFactor = async (id) => {
-  const response = await fetch(`${appsettings.apiUrl}Factor/delete/${id}`, {
-    method: "DELETE",
-    credentials: "include",
-    headers: {
-      "Accept": "application/json"
+  const response = await fetchWithAuth(
+    `${appsettings.apiUrl}Factor/delete/${id}`,
+    {
+      method: "DELETE",
+      credentials: "include",
+      headers: {
+        Accept: "application/json",
+      },
     }
-  });
+  );
+
+  if (!response) return;
 
   if (!response.ok) {
     throw new Error(`Failed to delete emission factor: ${response.statusText}`);
@@ -75,15 +82,16 @@ export const deleteEmissionFactor = async (id) => {
   return { success: true, id };
 };
 
-
 export const getMeasurementUnits = async () => {
-  const response = await fetch(`${appsettings.apiUrl}Unit/GetUnits`, {
+  const response = await fetchWithAuth(`${appsettings.apiUrl}Unit/GetUnits`, {
     method: "GET",
     credentials: "include",
     headers: {
-      Accept: "application/json"
-    }
+      Accept: "application/json",
+    },
   });
+
+  if (!response) return;
 
   if (!response.ok) {
     throw new Error("Failed to load measurement units");
@@ -92,13 +100,15 @@ export const getMeasurementUnits = async () => {
 };
 
 export const getSectors = async () => {
-  const response = await fetch(`${appsettings.apiUrl}Sector/Sector`, {
+  const response = await fetchWithAuth(`${appsettings.apiUrl}Sector/Sector`, {
     method: "GET",
     credentials: "include",
     headers: {
-      Accept: "application/json"
-    }
+      Accept: "application/json",
+    },
   });
+
+  if (!response) return;
 
   if (!response.ok) {
     throw new Error("Failed to load sectors");
@@ -107,13 +117,15 @@ export const getSectors = async () => {
 };
 
 export const getSources = async () => {
-  const response = await fetch(`${appsettings.apiUrl}Source/Get`, {
+  const response = await fetchWithAuth(`${appsettings.apiUrl}Source/Get`, {
     method: "GET",
     credentials: "include",
     headers: {
-      Accept: "application/json"
-    }
+      Accept: "application/json",
+    },
   });
+
+  if (!response) return;
 
   if (!response.ok) {
     throw new Error("Failed to load sources");
@@ -122,13 +134,15 @@ export const getSources = async () => {
 };
 
 export const getAllPCGs = async () => {
-  const response = await fetch(`${appsettings.apiUrl}PCGs/PCGs`, {
+  const response = await fetchWithAuth(`${appsettings.apiUrl}PCGs/PCGs`, {
     method: "GET",
     credentials: "include",
     headers: {
-      Accept: "application/json"
-    }
+      Accept: "application/json",
+    },
   });
+
+  if (!response) return;
 
   if (!response.ok) {
     throw new Error("Failed to load PCGs");
@@ -137,9 +151,9 @@ export const getAllPCGs = async () => {
 };
 
 const parseJSON = async (response) => {
-  const contentType = response.headers.get("content-type") || ""
+  const contentType = response.headers.get("content-type") || "";
   if (contentType.includes("application/json")) {
-    return response.json()
+    return response.json();
   }
-  return response.text()
-}
+  return response.text();
+};

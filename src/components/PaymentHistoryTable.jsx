@@ -75,11 +75,11 @@ const PaymentHistoryTable = () => {
     { Header: "Tipo de Evento", accessor: "tipoEvento", align: "left" },
     { Header: "Descripción", accessor: "descripcion", align: "left" },
     { Header: "Monto", accessor: "monto", align: "center" },
-    { Header: "Acciones", accessor: "acciones", align: "center" },
+    // { Header: "Acciones", accessor: "acciones", align: "center" },
   ];
 
   const handleViewDetails = (payment) => {
-    console.log("View details for payment:", payment);
+    
     // You might want to implement a modal or detailed view here
   };
 
@@ -107,25 +107,25 @@ const PaymentHistoryTable = () => {
         {formatCurrency(payment.monto)}
       </MDTypography>
     ),
-    acciones: (
-      <Stack
-        direction="row"
-        spacing={1}
-        justifyContent="center"
-        alignItems="center"
-      >
-        <Tooltip title="Ver detalles">
-          <IconButton
-            size="small"
-            color="info"
-            onClick={() => handleViewDetails(payment)}
-            disabled={!payment} // Disable if no payment data
-          >
-            <EditIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      </Stack>
-    ),
+    // acciones: (
+    //   <Stack
+    //     direction="row"
+    //     spacing={1}
+    //     justifyContent="center"
+    //     alignItems="center"
+    //   >
+    //     <Tooltip title="Ver detalles">
+    //       <IconButton
+    //         size="small"
+    //         color="info"
+    //         onClick={() => handleViewDetails(payment)}
+    //         disabled={!payment} // Disable if no payment data
+    //       >
+    //         <EditIcon fontSize="small" />
+    //       </IconButton>
+    //     </Tooltip>
+    //   </Stack>
+    // ),
   }));
 
   if (loading) {
@@ -137,37 +137,17 @@ const PaymentHistoryTable = () => {
   }
 
   if (error) {
-    return (
-      <MDBox p={3}>
-        <MDTypography color="error">
-          Error al cargar el historial: {error}
-        </MDTypography>
-        <MDBox mt={2}>
-          <MDTypography
-            variant="button"
-            color="info"
-            onClick={() => window.location.reload()}
-            sx={{ cursor: "pointer" }}
-          >
-            Intentar nuevamente
-          </MDTypography>
-        </MDBox>
-      </MDBox>
-    );
+    return null;
   }
 
-  if (payments.length === 0) {
-    return (
-      <MDBox p={3}>
-        <MDTypography>No se encontraron registros de pagos</MDTypography>
-      </MDBox>
-    );
+  if (!payments || payments.length === 0) {
+    return null;
   }
 
   return (
     <MDBox pt={6} pb={3}>
-      <Grid container spacing={6}>
-        <Grid xs={12}>
+      <Grid container spacing={5}>
+        <Grid size={{ xs: 12 }}>
           <Card>
             <MDBox
               mx={2}
@@ -183,11 +163,19 @@ const PaymentHistoryTable = () => {
                 Historial de pagos
               </MDTypography>
             </MDBox>
-            <MDBox pt={3}
-            minWidth="72rem">
+            <MDBox
+              pt={3}
+              sx={{
+                p: 3,
+                textAlign: "center",
+                width: "100%",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
               <DataTable
                 table={{ columns, rows }}
-                isSorted={true}
+                isSorted={false}
                 entriesPerPage={false}
                 showTotalEntries={true}
                 noEndBorder={false}

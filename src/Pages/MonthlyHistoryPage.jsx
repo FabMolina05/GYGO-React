@@ -58,12 +58,23 @@ export function MonthlyHistoryPage() {
       minute: "2-digit",
     });
 
+    const traducirTipoCambio = (tipo) => {
+  switch (tipo) {
+    case "Create":
+      return "Creación";
+    case "Update":
+      return "Actualización";
+    default:
+      return tipo;
+  }
+};
+
   const getTipoCambioIcon = (tipo) => {
-    switch (tipo) {
+    const tipoTraducido = traducirTipoCambio(tipo);
+    switch (tipoTraducido) {
       case "Creación":
         return <TrendingUpIcon fontSize="small" />;
-      case "Update":
-      case "Edición":
+      case "Actualización":
         return <EditIcon fontSize="small" />;
       default:
         return <HistoryIcon fontSize="small" />;
@@ -99,7 +110,7 @@ export function MonthlyHistoryPage() {
     ),
     tipo: (
       <MDTypography variant="caption" color="text">
-        {getTipoCambioIcon(c.tipo)} {c.tipo}
+        {getTipoCambioIcon(c.tipo)} {traducirTipoCambio(c.tipo)}
       </MDTypography>
     ),
     descripcion: (
@@ -138,7 +149,7 @@ export function MonthlyHistoryPage() {
                     Historial de Cambios
                   </MDTypography>
                   <MDTypography variant="body2" color="text">
-                    Registro de cambios para el consumo mensual ID: {id}
+                    Registro de cambios para el consumo mensual
                   </MDTypography>
                 </Grid>
               </Grid>
@@ -158,7 +169,7 @@ export function MonthlyHistoryPage() {
             <Card sx={{ p: 3 }}>
               <MDTypography variant="subtitle2" color="text">Tipo Más Común</MDTypography>
               <MDTypography variant="h6" fontWeight="bold">
-                {getTipoCambioIcon(estadisticas.tipoMasComun)} {estadisticas.tipoMasComun || "N/A"}
+                {getTipoCambioIcon(estadisticas.tipoMasComun)} {traducirTipoCambio(estadisticas.tipoMasComun) || "N/A"}
               </MDTypography>
             </Card>
           </Grid>

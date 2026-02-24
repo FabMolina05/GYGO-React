@@ -1,11 +1,12 @@
-import { useState } from "react"
-import "../styles/InviteModal.css"
+import { useState } from "react";
+import "../styles/InviteModal.css";
 import {
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   IconButton,
+  TextField,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import MDBox from "components/MDBox";
@@ -20,133 +21,130 @@ import MDTypography from "components/MDTypography";
  * @param {boolean} loading - Loading state for invite action
  */
 const InviteModal = ({ isOpen, onClose, onInvite, loading }) => {
-  const [email, setEmail] = useState("")
-  const [error, setError] = useState("")
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
 
   const handleSubmit = (e) => {
-    e.preventDefault()
-    setError("")
+    e.preventDefault();
+    setError("");
 
     // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email.trim()) {
-      setError("Email is required")
-      return
+      setError("El correo electronico es obligatorio.");
+      return;
     }
     if (!emailRegex.test(email)) {
-      setError("Please enter a valid email address")
-      return
+      setError("Por favor ingresa una dirección de correo electrónico válida.");
+      return;
     }
-
-    onInvite(email)
-  }
+    
+    onInvite(email);
+     setEmail("");
+  };
 
   const handleClose = () => {
-    setEmail("")
-    setError("")
-    onClose()
-  }
+    setEmail("");
+    setError("");
+    onClose();
+  };
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   return (
- 
+    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+      <DialogTitle>
+        <MDBox
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+        >
+          <MDTypography variant="h5">Invitar usuario al grupo</MDTypography>
+          <IconButton onClick={handleClose}>
+            <CloseIcon />
+          </IconButton>
+        </MDBox>
+      </DialogTitle>
 
+      <DialogContent dividers>
+        <form onSubmit={handleSubmit}>
+          <MDBox mb={2}>
+            <TextField
+              label="Correo Electronico"
+              name="correoelectronico"
+              type="email"
+              fullWidth
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              error={Boolean(error)}
+              disabled={loading}
+            />
+            {error && (
+              <MDTypography variant="caption" color="error">
+                {error}
+              </MDTypography>
+            )}
+          </MDBox>
+        </form>
+      </DialogContent>
 
-<Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-  <DialogTitle>
-    <MDBox display="flex" justifyContent="space-between" alignItems="center">
-      <MDTypography variant="h5">Invitar usuario al grupo</MDTypography>
-      <IconButton onClick={handleClose}>
-        <CloseIcon />
-      </IconButton>
-    </MDBox>
-  </DialogTitle>
-
-  <DialogContent>
-    <form onSubmit={handleSubmit}>
-      <MDBox mb={2}>
-        <MDTypography variant="body2" fontWeight="medium">
-          Correo electrónico
-        </MDTypography>
-        <MDInput
-          type="email"
-          fullWidth
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="ejemplo@correo.com"
-          error={Boolean(error)}
+      <DialogActions>
+        <MDButton
+          variant="outlined"
+          color="error"
+          onClick={handleClose}
           disabled={loading}
-        />
-        {error && (
-          <MDTypography variant="caption" color="error">
-            {error}
-          </MDTypography>
-        )}
-      </MDBox>
-    </form>
-  </DialogContent>
+        >
+          Cancelar
+        </MDButton>
+        <MDButton
+          variant="gradient"
+          color="success"
+          type="submit"
+          onClick={handleSubmit}
+          disabled={loading}
+        >
+          {loading ? "Enviando..." : "Enviar invitación"}
+        </MDButton>
+      </DialogActions>
+    </Dialog>
+  );
+};
 
-  <DialogActions>
-    <MDButton
-      variant="outlined"
-      color="secondary"
-      onClick={handleClose}
-      disabled={loading}
-    >
-      Cancelar
-    </MDButton>
-    <MDButton
-      variant="gradient"
-      color="info"
-      type="submit"
-      onClick={handleSubmit}
-      disabled={loading}
-    >
-      {loading ? "Enviando..." : "Enviar invitación"}
-    </MDButton>
-  </DialogActions>
-</Dialog>
+export default InviteModal;
 
-  )
-}
+//  <div className="modal-overlay" onClick={handleClose}>
+//     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+//       <div className="modal-header">
+//         <h2>Invite User to Group</h2>
+//         <button className="close-button" onClick={handleClose}>
+//           ×
+//         </button>
+//       </div>
 
-export default InviteModal
+//       <form onSubmit={handleSubmit} className="modal-body">
+//         <div className="form-group">
+//           <label htmlFor="email">Email Address</label>
+//           <input
+//             type="email"
+//             id="email"
+//             value={email}
+//             onChange={(e) => setEmail(e.target.value)}
+//             placeholder="Enter user's email address"
+//             disabled={loading}
+//             className={error ? "error" : ""}
+//           />
+//           {error && <span className="error-message">{error}</span>}
+//         </div>
 
-
-
-  //  <div className="modal-overlay" onClick={handleClose}>
-  //     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-  //       <div className="modal-header">
-  //         <h2>Invite User to Group</h2>
-  //         <button className="close-button" onClick={handleClose}>
-  //           ×
-  //         </button>
-  //       </div>
-
-  //       <form onSubmit={handleSubmit} className="modal-body">
-  //         <div className="form-group">
-  //           <label htmlFor="email">Email Address</label>
-  //           <input
-  //             type="email"
-  //             id="email"
-  //             value={email}
-  //             onChange={(e) => setEmail(e.target.value)}
-  //             placeholder="Enter user's email address"
-  //             disabled={loading}
-  //             className={error ? "error" : ""}
-  //           />
-  //           {error && <span className="error-message">{error}</span>}
-  //         </div>
-
-  //         <div className="modal-footer">
-  //           <button type="button" className="btn btn-secondary" onClick={handleClose} disabled={loading}>
-  //             Cancel
-  //           </button>
-  //           <button type="submit" className="btn btn-primary" disabled={loading}>
-  //             {loading ? "Sending..." : "Send Invite"}
-  //           </button>
-  //         </div>
-  //       </form>
-  //     </div>
-  //   </div>
+//         <div className="modal-footer">
+//           <button type="button" className="btn btn-secondary" onClick={handleClose} disabled={loading}>
+//             Cancel
+//           </button>
+//           <button type="submit" className="btn btn-primary" disabled={loading}>
+//             {loading ? "Sending..." : "Send Invite"}
+//           </button>
+//         </div>
+//       </form>
+//     </div>
+//   </div>

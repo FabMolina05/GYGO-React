@@ -1,4 +1,5 @@
 import { appsettings } from "../settings/appsettings";
+import { fetchWithAuth } from "../utils/fetchWithAuth";
 
 
 export async function PostAddGroup(newGroup, correogrupo, selectedService,image) {
@@ -13,12 +14,14 @@ export async function PostAddGroup(newGroup, correogrupo, selectedService,image)
 
 
 
-    const response = await fetch(`${appsettings.apiUrl}Group/create`, {
+    const response = await fetchWithAuth(`${appsettings.apiUrl}Group/create`, {
       method: "POST",
       credentials: "include",
       body: formData,
     });
+    if (!response) return;
 
+    
   if (response.ok) {
         return { success: true };
     }
@@ -32,6 +35,8 @@ export async function PostAddGroup(newGroup, correogrupo, selectedService,image)
 
 export async function getUsers(){
     const response = await fetch(`${appsettings.apiUrl}getUsers`);
+    
+
     if(response.ok){
         const data = await response.json();
         return data;
@@ -39,3 +44,30 @@ export async function getUsers(){
         return [];
     }
 }
+
+export async function reactivateGroup(groupId){
+  const res = await fetchWithAuth(`${appsettings.apiUrl}Group/reactivate/${groupId}`, {
+    method: "PUT",
+    credentials: "include"
+  });
+    if (!response) return;
+
+  return await response.json();
+};
+
+
+export async function DoesUserHaveGroup(){
+  try{
+    const res = await fetchWithAuth(`${appsettings.apiUrl}Group/DoesUserHaveGroup`, {
+      method: "GET",
+      credentials: "include"
+    });
+
+    if(!res.ok) return { state:false };
+    return await res.json();
+
+  }catch(err){
+    return { success:false, error:err };
+  }
+}
+

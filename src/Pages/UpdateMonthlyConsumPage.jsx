@@ -86,7 +86,7 @@ export function UpdateMonthlyConsumPage() {
         timer: 2000,
         showConfirmButton: false,
       });
-      navigate(`/consumption/monthly/${consumptionId}`);
+      navigate(`/consumo/mensual/${consumptionId}`);
     } catch (error) {
       console.error("Error al actualizar consumo mensual:", error);
       setErrors({ submit: "Error al actualizar el consumo." });

@@ -9,12 +9,7 @@ import Garnier from '../../assets/Garnier-logo.png';
 
 
 export const AboutUs = () => {
-  const { logoutRol } = useAuth();
-
-  useEffect(() => {
-    logoutRol();
-  }, []);
-
+  
   return (
     <div className="about-page">
       <PublicHeader />

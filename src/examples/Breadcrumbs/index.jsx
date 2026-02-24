@@ -39,7 +39,7 @@ function Breadcrumbs({ icon, title, route, light = false }) {
           },
         }}
       >
-        <Link to="/">
+        <Link to="/panel-control">
           <MDTypography
             component="span"
             variant="body2"

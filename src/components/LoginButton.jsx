@@ -7,7 +7,7 @@ function SignInButton() {
 
   const navigate = useNavigate();
   const handleClick = () => {
-    console.log('Sign In button clicked');
+    
     navigate("/Login");
   };
 

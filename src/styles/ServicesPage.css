@@ -40,27 +40,22 @@
 .services-grid-section {
   padding: 120px 0;
 }
-
 .services-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 40px;
   margin-top: 40px;
   max-width: 1200px;
   margin-left: auto;
   margin-right: auto;
+  grid-auto-flow: dense; /* Permite reorganizar items */
 }
 
-/* Centrar las dos últimas tarjetas */
-.service-card:nth-child(4) {
-  grid-column: 1 / 2;
-  justify-self: center;
-}
 
-.service-card:nth-child(5) {
-  grid-column: 3 / 4;
-  justify-self: center;
-}
+/* Las últimas 2 crean su propia "sub-fila" de 2 columnas */
+
+
+/* Ajusta el ancho de la última fila */
 
 /* Eliminar las clases de row ya que ahora usamos grid */
 .services-row {
@@ -180,8 +175,10 @@
 /* Carbon Footprint Platform Section */
 .platform-section {
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-  padding: 100px 0;
+  padding: 100px 20px;
   overflow: hidden;
+  justify-content: center;
+  
 }
 
 .platform-content {
@@ -190,11 +187,14 @@
   gap: 80px;
   align-items: center;
   max-width: 1200px;
+  width: 100%;
+  padding: 0 100px;
   margin: 0 auto;
 }
 
 .platform-text {
   max-width: 500px;
+  
 }
 
 .platform-title {
@@ -425,7 +425,7 @@
   
   .platform-content {
     grid-template-columns: 1fr;
-    gap: 50px;
+    gap: 40px;
     text-align: center;
   }
   

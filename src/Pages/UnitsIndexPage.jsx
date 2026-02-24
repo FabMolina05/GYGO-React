@@ -9,10 +9,14 @@ import {
   Stack,
   TextField,
   Box,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import { AddOutlined, EditOutlined } from "@mui/icons-material";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
-
+import CloseIcon from "@mui/icons-material/Close";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
@@ -30,6 +34,9 @@ export function UnitsIndexPage() {
   const [errors, setErrors] = useState({});
   const [editMode, setEditMode] = useState(false);
   const [editId, setEditId] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+
+
 
   useEffect(() => {
     loadUnits();
@@ -64,28 +71,51 @@ export function UnitsIndexPage() {
 
   const handleSave = async () => {
     if (!unitData.nombre.trim() || !unitData.diminutivo.trim()) {
-      setErrors({ nombre: "Requerido", diminutivo: "Requerido" });
+      setErrors({
+        nombre: !unitData.nombre.trim() ? "Requerido" : "",
+        diminutivo: !unitData.diminutivo.trim() ? "Requerido" : "",
+      });
       return;
     }
     try {
       if (editMode) {
-        await UpdateUnits({ unidadId: editId, ...unitData });
+        const result = await UpdateUnits({ unidadId: editId, ...unitData });
         setModalOpen(false);
-        await Swal.fire({
-          icon: "success",
-          title: "Unidad actualizada correctamente",
-          showConfirmButton: false,
-          timer: 2000,
-        });
+
+        if (result.success) {
+          Swal.fire({
+            icon: "success",
+            title: "Unidad actualizada correctamente",
+            showConfirmButton: false,
+            timer: 2000,
+          });
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: result.message,
+            showConfirmButton: false,
+            timer: 2000,
+          });
+        }
       } else {
-        await CreateUnits(unitData);
+        const result = await CreateUnits(unitData);
         setModalOpen(false);
-        await Swal.fire({
-          icon: "success",
-          title: "Unidad creada correctamente",
-          showConfirmButton: false,
-          timer: 2000,
-        });
+       
+        if (result.success) {
+          Swal.fire({
+            icon: "success",
+            title: "Unidad creado exitosamente",
+            showConfirmButton: false,
+            timer: 2000,
+          });
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: result.message,
+            showConfirmButton: false,
+            timer: 2000,
+          });
+        }
       }
       await loadUnits();
     } catch (e) {
@@ -94,13 +124,17 @@ export function UnitsIndexPage() {
     }
   };
 
+    const filtered = units.filter((item) =>
+    item.nombre.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   const columns = [
     { Header: "Nombre", accessor: "nombre", align: "left" },
     { Header: "Diminutivo", accessor: "diminutivo", align: "left" },
     { Header: "Acciones", accessor: "actions", align: "center" },
   ];
 
-  const rows = units.map((unit) => ({
+  const rows = filtered.map((unit) => ({
     nombre: (
       <MDTypography variant="caption" fontWeight="medium">
         {unit.nombre}
@@ -116,7 +150,7 @@ export function UnitsIndexPage() {
         <Tooltip title="Editar Unidad">
           <IconButton
             size="small"
-            color="success"
+            sx={{ color: "#1976D2" }}
             onClick={() => handleEditClick(unit)}
           >
             <EditOutlined fontSize="small" />
@@ -132,7 +166,7 @@ export function UnitsIndexPage() {
       <MDBox py={3}>
         <Grid container spacing={3} sx={{ mb: 5 }}>
           <Grid size={{ xs: 12 }}>
-            <Card
+            <MDBox
               sx={{
                 background: "#ffffff",
                 mb: 3,
@@ -142,7 +176,7 @@ export function UnitsIndexPage() {
                 padding: 3,
               }}
             >
-              <CardContent>
+             
                 <Grid
                   container
                   alignItems="center"
@@ -156,7 +190,7 @@ export function UnitsIndexPage() {
                         </MDBox>
                         <MDBox display="flex" alignItems="center" gap={1}>
                           <MDTypography variant="body2" color="text">
-                            Gestiona las unidades registradas en el sistema
+                            Gestiona las unidades registradas en el sistema.
                           </MDTypography>
                         </MDBox>
                       </MDBox>
@@ -181,8 +215,26 @@ export function UnitsIndexPage() {
                     </MDButton>
                   </Grid>
                 </Grid>
-              </CardContent>
-            </Card>
+                
+           <Grid container spacing={2} mt={1}>
+                <Grid xs={12} sm={6} md={4} lg={3}>
+                  <TextField
+                    fullWidth
+                    variant="outlined"
+                    placeholder="Buscar por nombre de la unidad ..."
+                    size="large"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    sx={{ width: "230px", mb: 3 }}
+                  />
+                </Grid>
+              </Grid>
+
+
+
+
+
+            </MDBox>
           </Grid>
 
           <Grid size={{ xs: 12 }}>
@@ -197,20 +249,20 @@ export function UnitsIndexPage() {
                 borderRadius="lg"
                 coloredShadow="success"
               >
-                <MDTypography variant="h6" color="white">
+                <MDTypography variant="h6" color="white" align="left">
                   Registro de Unidades
                 </MDTypography>
               </MDBox>
               <MDBox
-              pt={3}
-                     sx={{
-                          p: 4,
-                          textAlign: "center",
-                          minHeight: "100px",
-                          width: "1200px",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}>
+                pt={3}
+                sx={{
+                  p: 4,
+                  textAlign: "center",
+                  width: "100%",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
                 <DataTable
                   table={{ columns, rows }}
                   isSorted={false}
@@ -226,55 +278,68 @@ export function UnitsIndexPage() {
         <Footer />
       </MDBox>
 
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 400,
-            bgcolor: "background.paper",
-            boxShadow: 24,
-            p: 4,
-            borderRadius: 2,
-          }}
-        >
-          <MDTypography variant="h6" gutterBottom>
-            {editMode ? "Editar Unidad" : "Agregar Unidad"}
-          </MDTypography>
-          <TextField
-            fullWidth
-            label="Nombre"
-            value={unitData.nombre}
-            onChange={(e) =>
-              setUnitData({ ...unitData, nombre: e.target.value })
-            }
-            error={!!errors.nombre}
-            helperText={errors.nombre}
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            fullWidth
-            label="Diminutivo"
-            value={unitData.diminutivo}
-            onChange={(e) =>
-              setUnitData({ ...unitData, diminutivo: e.target.value })
-            }
-            error={!!errors.diminutivo}
-            helperText={errors.diminutivo}
-            sx={{ mb: 2 }}
-          />
-          <MDButton
-            variant="gradient"
-            color="success"
-            onClick={handleSave}
-            fullWidth
-          >
-            Guardar
-          </MDButton>
+      <Dialog
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        fullWidth
+        maxWidth="xs"
+      >
+        <Box sx={{}}>
+          <DialogTitle>
+            <MDBox
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+            >
+              <MDTypography variant="h6" gutterBottom>
+                {editMode ? "Editar Unidad" : "Agregar Unidad"}
+              </MDTypography>
+
+              <IconButton onClick={() => setModalOpen(false)}>
+                <CloseIcon />
+              </IconButton>
+            </MDBox>
+          </DialogTitle>
+
+          <DialogContent dividers>
+            <TextField
+              fullWidth
+              label="Nombre"
+              value={unitData.nombre}
+              onChange={(e) => {
+                setUnitData({ ...unitData, nombre: e.target.value });
+                setErrors((prev) => ({ ...prev, nombre: "" }));
+              }}
+              error={!!errors.nombre}
+              helperText={errors.nombre}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              label="Diminutivo"
+              value={unitData.diminutivo}
+              onChange={(e) => {
+                setUnitData({ ...unitData, diminutivo: e.target.value });
+                setErrors((prev) => ({ ...prev, diminutivo: "" }));
+              }}
+              error={!!errors.diminutivo}
+              helperText={errors.diminutivo}
+              sx={{ mb: 2 }}
+            />
+          </DialogContent>
+
+          <DialogActions>
+            <MDButton
+              variant="gradient"
+              color="success"
+              onClick={handleSave}
+              fullWidth
+            >
+              Guardar
+            </MDButton>
+          </DialogActions>
         </Box>
-      </Modal>
+      </Dialog>
     </DashboardLayout>
   );
 }

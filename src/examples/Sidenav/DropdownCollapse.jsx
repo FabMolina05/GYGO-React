@@ -22,8 +22,7 @@ function DropdownCollapse({ route, collapseName }) {
         icon={route.icon}
         onClick={() => setOpen(!open)}
         active={
-          route.key === collapseName ||
-          route.collapse.some((sub) => sub.key === collapseName)
+          route.key === collapseName 
         }
         noCollapse
         sx={{

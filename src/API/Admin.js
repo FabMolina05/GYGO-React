@@ -58,7 +58,6 @@ export const getGroupUsers = async () => {
 
 export const sendUserInvite = async (email) => {
   try {
-   
     const response = await fetch(`${appsettings.apiUrl}Admin/sendInvite`, {
       method: "POST",
       mode: "cors",
@@ -70,18 +69,12 @@ export const sendUserInvite = async (email) => {
       body: JSON.stringify(email),
     });
 
-    const data = await parseJSON(response);
-
-    if (!response.ok) {
-      console.error(
-        "Detalles del error:",
-        errorData,
-        "Código:",
-        response.status
-      );
+     const data = await response.json();
+    if (!data.success) {
+      return { success: false, message: data.message };
     }
 
-    return data;
+    return { success: true, message: data.message };
   } catch (error) {
     console.error("Error sending invite:", error);
     throw error;
@@ -90,22 +83,22 @@ export const sendUserInvite = async (email) => {
 
 export const removeUserFromGroup = async (userId) => {
   try {
-
-    const response = await fetch(`${appsettings.apiUrl}Admin/removeFromGroup/${userId}`, 
+    const response = await fetch(
+      `${appsettings.apiUrl}Admin/removeFromGroup/${userId}`,
       {
-      method: "PUT",
-      credentials: "include",
-            headers: {
-        Accept: "text/plain", // El backend devuelve texto
-      },
-
-    });
+        method: "PUT",
+        credentials: "include",
+        headers: {
+          Accept: "text/plain", // El backend devuelve texto
+        },
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`Failed to remove user: ${response.statusText}`);
     }
 
-    const resultText = await response.text(); 
+    const resultText = await response.text();
     return resultText;
   } catch (error) {
     console.error("Error removing user:", error);
@@ -127,6 +120,20 @@ async function fetchGroupId() {
     return groupId;
   } catch (error) {
     console.error("Error fetching group ID:", error);
+  }
+}
+
+export async function fetchValidarEstadoUsuario(){
+  try {
+    const response = await fetch(`${appsettings.apiUrl}admin/ValidarEstadoUsuario`, {
+      method: "GET",
+      credentials: "include",
+    });
+    if(!response.ok) return { state:false };
+    return await response.json();
+
+  } catch (error) {
+    return { state:false, error };
   }
 }
 

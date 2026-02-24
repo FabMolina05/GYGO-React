@@ -4,7 +4,10 @@ import {
   Grid,
   Card,
   CardContent,
-  FormControl, InputLabel, Select, MenuItem
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 
@@ -32,7 +35,6 @@ const meses = [
   { value: 12, label: "Diciembre" },
 ];
 
-
 const IncidentsHistoryPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [incidents, setIncidents] = useState([]);
@@ -46,7 +48,6 @@ const IncidentsHistoryPage = () => {
     try {
       const response = await GetIncidentsHistory();
       const transformed = response.map((i) => {
-
         const fecha = new Date(i.detectedAt);
         const month = fecha.getMonth() + 1;
         const year = fecha.getFullYear();
@@ -58,8 +59,8 @@ const IncidentsHistoryPage = () => {
           reales: `${i.realEmissions.toFixed(2)} kg CO₂`,
           leido: i.isRead ? "✔️" : "❌",
           month,
-          year
-        }
+          year,
+        };
       });
       setIncidents(transformed);
     } catch (err) {
@@ -69,35 +70,35 @@ const IncidentsHistoryPage = () => {
     }
   };
 
-
   useEffect(() => {
     getIncidents();
   }, []);
 
-useEffect(() => {
+  useEffect(() => {
     const fetchYears = async () => {
       setLoadingYears(true);
       const result = await GetYearsByGroup();
       setAvailableYears(result);
       setLoadingYears(false);
     };
-    fetchYears()
-  }, [])
-
+    fetchYears();
+  }, []);
 
   useEffect(() => {
-  setFilteredIncidents(incidents);
-}, [incidents]);
-
-
+    setFilteredIncidents(incidents);
+  }, [incidents]);
 
   useEffect(() => {
     let datosFiltrados = [...incidents];
     if (filtros.mes !== "") {
-      datosFiltrados = datosFiltrados.filter(i => i.month === Number(filtros.mes));
+      datosFiltrados = datosFiltrados.filter(
+        (i) => i.month === Number(filtros.mes)
+      );
     }
     if (filtros.año !== "") {
-      datosFiltrados = datosFiltrados.filter(i => i.year === Number(filtros.año));
+      datosFiltrados = datosFiltrados.filter(
+        (i) => i.year === Number(filtros.año)
+      );
     }
     setFilteredIncidents(datosFiltrados);
   }, [filtros, incidents]);
@@ -106,7 +107,7 @@ useEffect(() => {
     { Header: "Fecha", accessor: "fecha", align: "left" },
     { Header: "Promedio Esperado", accessor: "promedio", align: "center" },
     { Header: "Emisiones Reales", accessor: "reales", align: "center" },
-    { Header: "Leído", accessor: "leido", align: "center" },
+    { Header: "Notificado", accessor: "leido", align: "center" },
   ];
 
   const rows = filteredIncidents.map((i) => ({
@@ -136,35 +137,40 @@ useEffect(() => {
     <DashboardLayout>
       <DashboardNavbar></DashboardNavbar>
       <MDBox py={3}>
-        <Grid container spacing={3} sx={{ mb: 5 }}>
-          <Grid size={{ xs: 12 }}>
-            <Card
-              sx={{
-                background: "#ffffff",
-                mb: 1,
-                borderRadius: 2,
-                border: "1px solid #e5e7eb",
-                boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-              }}
-            >
-              <CardContent>
-                <Grid container alignItems="center" justifyContent="center">
-                  <Grid>
-                    <MDBox display="flex" flexDirection="column" gap={1}>
-                      <MDTypography variant="h6">Historial de Incidentes</MDTypography>
-                      <MDTypography variant="body2" color="#495057">
-                        Visualiza todos los incidentes de exceso de emisiones registrados
-                      </MDTypography>
-                    </MDBox>
-                  </Grid>
+        <MDBox
+          sx={{
+            borderRadius: 2,
 
-                </Grid>
-              </CardContent>
-            </Card>
+            p: 3,
+            mb: 2,
+            background: "#ffffff",
+            border: "1px solid #e5e7eb",
+            boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+          }}
+        >
+          <Grid container alignItems="center" justifyContent="space-between">
+            <Grid item>
+              <MDBox display="flex" flexDirection="column">
+                <MDBox display="flex" alignItems="center" gap={1}>
+                  <MDTypography variant="h6">
+                    Historial de Incidentes
+                  </MDTypography>
+                </MDBox>
+                <MDTypography variant="body2" color="text">
+                  Visualiza todos los incidentes de exceso de emisiones
+                  registrados.
+                </MDTypography>
+              </MDBox>
+            </Grid>
           </Grid>
-
-          <Grid size={{ xs: 12 }} sx={{ mb: 2 }}>
-            <Card sx={{ p: 3 }}>
+          <Grid
+            container
+            alignItems="center"
+            justifyContent="space-between"
+            spacing={2}
+            mt={2}
+          >
+            <Grid size={{ xs: 12 }} sx={{ mb: 2, pt: "20px" }}>
               <Grid container spacing={2} alignItems="center">
                 {/* Mes */}
                 <Grid size={{ xs: 12, md: 5 }}>
@@ -204,11 +210,11 @@ useEffect(() => {
                       }
                     >
                       <MenuItem value="">Seleccione</MenuItem>
-                        {availableYears.map((y) => (
-                          <MenuItem key={y.yearlyConsumptionId} value={y.year}>
-                            {y.year}
-                          </MenuItem>
-                        ))}
+                      {availableYears.map((y) => (
+                        <MenuItem key={y.yearlyConsumptionId} value={y.year}>
+                          {y.year}
+                        </MenuItem>
+                      ))}
                     </Select>
                   </FormControl>
                 </Grid>
@@ -223,8 +229,13 @@ useEffect(() => {
                   </MDButton>
                 </Grid>
               </Grid>
-            </Card>
-          </Grid>          
+            </Grid>
+          </Grid>
+        </MDBox>
+
+        <Grid container spacing={3} sx={{ mb: 5, pt:8}}>
+        
+
 
           <Grid size={{ xs: 12 }}>
             <Card>
@@ -238,7 +249,7 @@ useEffect(() => {
                 borderRadius="lg"
                 coloredShadow="success"
               >
-                <MDTypography variant="h6" color="white">
+                <MDTypography variant="h6" color="white" align="left">
                   Registro de Incidentes
                 </MDTypography>
               </MDBox>

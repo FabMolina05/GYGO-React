@@ -159,7 +159,7 @@ export async function fetchPaymentHistory() {
 
 export async function cancelAdminSubscription(groupId, reason) {
   try {
-    console.log("Llamando a API con:", { groupId, reason }); // <-- Añade esto
+    
     
     const response = await fetch(`${appsettings.apiUrl}Subscription/cancel-admin/${groupId}`, {
       method: "POST",
@@ -170,18 +170,62 @@ export async function cancelAdminSubscription(groupId, reason) {
       body: JSON.stringify(reason) // Envía solo el string
     });
 
-    console.log("Respuesta recibida:", response.status); // <-- Añade esto
+    
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Error en respuesta:", errorText); // <-- Añade esto
+      
       throw new Error(errorText);
     }
 
     return await response.text();
   } catch (error) {
-    console.error("Error en fetch:", error); // <-- Añade esto
+    
     throw error;
+  }
+}
+
+export async function confirmSubscription() {
+  try {
+    const response = await fetch(`${appsettings.apiUrl}Subscription/confirm`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+    });
+
+    
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (!data) {
+      throw new Error("Empty response body");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error confirming subscription:", error);
+    return { success: false, message: "Error al confirmar la suscripción." };
+  }
+}
+
+
+export async function sendSubscriptionEmail() {
+  try {
+    const response = await fetch(`${appsettings.apiUrl}Subscription/send-subscription-email`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+    });
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error sending subscription email:", error);
+    return { success: false, message: "Error al enviar el correo de suscripción." };
   }
 }
 

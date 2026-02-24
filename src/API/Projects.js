@@ -1,60 +1,38 @@
 import { appsettings } from "../settings/appsettings";
+import { fetchWithAuth } from "../utils/fetchWithAuth";
 
 //API para llamar los proyectos por grupo
 export async function AddProject(projectData) {
   try {
+    const response = await fetchWithAuth(
+      `${appsettings.apiUrl}Projects/AddProject`,
+      {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(projectData),
+      }
+    );
 
-    const response = await fetch(`${appsettings.apiUrl}Projects/AddProject`, {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(projectData),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(
-        `Error al agregar proyecto: ${response.status} - ${errorText}`
-      );
-      return false;
-    }
-
-    return true;
+    if (!response) return;
 
     const data = await response.json();
-
-
-    if (!data.isSuccess) {
-      setError(data.errors ? data.errors.join(", ") : "Login failed");
-      return;
+    if (!data.success) {
+      return { success: false, message: data.message };
     }
 
-    if (data.is2FactorRequired) {
-      localStorage.setItem("tempToken", data.tempToken);
-      alert("Two-factor authentication required. Please verify.");
-      return;
-    }
-
-    if (data.token) {
-      //localStorage.setItem("authToken", data.token.AccessToken);
-      alert("Login successful!");
-      navigate("/DashboardGroupPage");
-      // falta redirect a la pagina de dashboard
-    } else {
-      throw new Error("Unexpected response from server");
-    }
+    return { success: true, message: data.message };
   } catch (error) {
-    console.error("AddProject error:", error);
-    throw error;
+    console.error("Error al agregar el proyecto:", error);
+    return { success: false, message: error.message };
   }
 }
 
 export async function UpdateProject(projectData) {
   try {
-
-    const response = await fetch(
+    const response = await fetchWithAuth(
       `${appsettings.apiUrl}Projects/UpdateProject`,
       {
         method: "PUT",
@@ -66,26 +44,23 @@ export async function UpdateProject(projectData) {
       }
     );
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(
-        `Error al agregar proyecto: ${response.status} - ${errorText}`
-      );
-      return false;
-    }
+    if (!response) return;
 
     const data = await response.json();
+    if (!data.success) {
+      return { success: false, message: data.message };
+    }
 
-    return true;
+    return { success: true, message: data.message };
   } catch (error) {
-    console.error("AddProject error:", error);
-    throw error;
+    console.error("Error al actualizar el proyecto:", error);
+    return { success: false, message: error.message };
   }
 }
 // API para eliminar proyectos
 export async function DProject(projectID) {
   try {
-    const response = await fetch(
+    const response = await fetchWithAuth(
       `${appsettings.apiUrl}Projects/DeleteProject?projectID=${projectID}`,
       {
         method: "DELETE",
@@ -95,7 +70,9 @@ export async function DProject(projectID) {
         },
       }
     );
- 
+
+    if (!response) return;
+
     if (response.ok) {
       return true;
     } else {
@@ -110,10 +87,15 @@ export async function DProject(projectID) {
 
 //API para llamar los proyectos por grupo
 export async function getProjects() {
-  const response = await fetch(`${appsettings.apiUrl}Projects/AllProjects`, {
-    method: "GET",
-    credentials: "include",
-  });
+  const response = await fetchWithAuth(
+    `${appsettings.apiUrl}Projects/AllProjects`,
+    {
+      method: "GET",
+      credentials: "include",
+    }
+  );
+  if (!response) return;
+
   if (response.ok) {
     const data = await response.json();
     return data;
@@ -124,13 +106,15 @@ export async function getProjects() {
 
 //API para los projectos pendientes
 export async function getProjectsbyStatus(status) {
-  const response = await fetch(
+  const response = await fetchWithAuth(
     `${appsettings.apiUrl}Projects/status/${status}`,
     {
       method: "GET",
       credentials: "include",
     }
   );
+  if (!response) return;
+
   if (response.ok) {
     const data = await response.json();
     return data;
@@ -141,13 +125,15 @@ export async function getProjectsbyStatus(status) {
 
 //API para obtener los proyectos por fechas
 export async function getProjectsByDates(startDate, endDate) {
-  const response = await fetch(
+  const response = await fetchWithAuth(
     `${appsettings.apiUrl}Projects/dates?Start_date=${startDate}&End_date=${endDate}`,
     {
       method: "GET",
       credentials: "include",
     }
   );
+  if (!response) return;
+
   if (response.ok) {
     const data = await response.json();
     return data;
@@ -158,12 +144,18 @@ export async function getProjectsByDates(startDate, endDate) {
 
 //API para obtener los proyectos y tareas para el pdf
 export async function getProjectsPDF(startDate, endDate) {
-  const response = await fetch(`${appsettings.apiUrl}Projects/CreatePdf?Start_date=${startDate}&End_date=${endDate}`, {
-    method: "GET",
-    credentials: "include",
-  });
+  const response = await fetchWithAuth(
+    `${appsettings.apiUrl}Projects/CreatePdf?Start_date=${startDate}&End_date=${endDate}`,
+    {
+      method: "GET",
+      credentials: "include",
+    }
+  );
+  if (!response) return;
+
   if (response.ok) {
     const data = await response.json();
+
     return data;
   } else {
     return [];

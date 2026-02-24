@@ -9,12 +9,7 @@ import { useAuth } from "../../context/AuthContext";
 import BigLogo from '../../assets/BigLogo.png';
 
 export const HomePage = () => {
-  const { logoutRol } = useAuth();
 
-
-  useEffect(() => {
-    logoutRol();
-  }, []);
 
 
   return (

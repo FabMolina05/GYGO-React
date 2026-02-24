@@ -103,7 +103,7 @@ export function UpdateConsumptionPage() {
         showConfirmButton: false,
         timer: 2000,
       });
-      navigate("/consumption");
+      navigate("/consumo");
     } catch (e) {
       console.error(e);
       setErrors({ submit: "Error al actualizar el consumo." });

@@ -2,6 +2,7 @@ import { useState } from "react";
 import MDButton from "@/components/MDButton";
 import { appsettings } from "../settings/appsettings";
 import MDBox from "components/MDBox";
+import Swal from "sweetalert2";
 
 export default function CancelSubscriptionButton({
   subscriptionId,
@@ -11,12 +12,28 @@ export default function CancelSubscriptionButton({
 
   const handleCancel = async () => {
     setLoading(true);
+    const result = await Swal.fire({
+      title: "¿Cancelar suscripción?",
+      text: "Esta acción no se puede deshacer.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Sí, cancelar",
+      cancelButtonText: "No, volver",
+    });
+
+    if(!result.isConfirmed){
+      setLoading(false);
+      return;
+    }
+
     try {
-      console.log("subscriptionId:", subscriptionId);
-      const url = new URL(`${appsettings.apiUrl}Subscription/cancel`);
+      
+      const url = new URL(`${appsettings.apiUrl}Subscription/cancel`, window.location.origin);
       url.searchParams.append("subscriptionId", subscriptionId);
       url.searchParams.append("reason", "User requested cancellation");
-      console.log("Request URL:", url.toString());
+      
 
       const response = await fetch(url.toString(), {
         method: "POST",
@@ -31,11 +48,22 @@ export default function CancelSubscriptionButton({
         throw new Error(`Error ${response.status}: ${errorText}`);
       }
 
-      alert("Suscripción cancelada exitosamente.");
+      await Swal.fire({
+        title: "Cancelada",
+        text: "La suscripción fue cancelada exitosamente.",
+        icon: "success",
+        confirmButtonText: "Aceptar",
+      });
+
       if (onSuccess) onSuccess();
     } catch (error) {
       console.error(error);
-      alert("Hubo un error al cancelar la suscripción.");
+      Swal.fire({
+        title: "Error",
+        text: error.message || "Hubo un error al cancelar la suscripción.",
+        icon: "error",
+        confirmButtonText: "Entendido",
+      });
     } finally {
       setLoading(false);
     }

@@ -89,7 +89,7 @@ export const ServicesHomePage = () => {
                     <h3 className="service-title">{service.title}</h3>
                     <p className="service-description">{service.description}</p>
                     <p className="service-details">{service.details}</p>
-                    
+
                   </div>
                 </div>
               ))}
@@ -106,54 +106,54 @@ export const ServicesHomePage = () => {
                 <p className="platform-subtitle">
                   Puedes ingresar a nuestra plataforma de gestión de huella de carbono
                 </p>
-               <Link to="/login" className="platform-btn">
-  Ingresar a la Plataforma
-</Link>
+                <Link to="/inicio-sesion" className="platform-btn">
+                  Ingresar a la Plataforma
+                </Link>
               </div>
               <div className="platform-image">
-                <img 
-                  src="https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80" 
-                  alt="Plataforma de gestión de huella de carbono" 
+                <img
+                  src="https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80"
+                  alt="Plataforma de gestión de huella de carbono"
                 />
               </div>
             </div>
           </div>
         </section>
 
-         {/* Contact Section */}
-            <section className="contact-section">
-              <div className="container-contact">
-                <div className="contact-content">
-                  <div className="contact-info">
-                    <h2 className="contact-title">¿Listo para comenzar?</h2>
-                    <p className="contact-subtitle">
-                      Contacta con nosotros para obtener más información sobre nuestros servicios
-                    </p>
-                    <div className="contact-details">
-                      <div className="contact-item">
-                        <Phone className="w-6 h-6" />
-                        <div style={{ marginLeft: "8%" }}>
-                          <h4>Teléfono</h4>
-                          <p>+(506) 6315-8782</p>
-                        </div>
-                      </div>
-                      <div className="contact-item">
-                        <Mail className="w-6 h-6" />
-                        <div >
-                          <h4>Email</h4>
-                          <p>fabiolamay209@gmail.com</p>
-                        </div>
-                      </div>
-                      <div className="contact-item">
-                        <MapPin className="w-6 h-6" />
-                        <div style={{ marginLeft: "8%" }}>
-                          <h4>Ubicación</h4>
-                          <p>Alajuela, Costa Rica</p>
-                        </div>
-                      </div>
+        {/* Contact Section */}
+        <section className="contact-section">
+          <div className="container-contact">
+            <div className="contact-content">
+              <div className="contact-info">
+                <h2 className="contact-title">¿Listo para comenzar?</h2>
+                <p className="contact-subtitle">
+                  Contacta con nosotros para obtener más información sobre nuestros servicios
+                </p>
+                <div className="contact-details">
+                  <div className="contact-item">
+                    <Phone className="w-6 h-6" />
+                    <div style={{ marginLeft: "8%" }}>
+                      <h4>Teléfono</h4>
+                      <p>+(506) 6315-8782</p>
                     </div>
                   </div>
-                  {/* 
+                  <div className="contact-item">
+                    <Mail className="w-6 h-6" />
+                    <div >
+                      <h4>Email</h4>
+                      <p>fabiolamay209@gmail.com</p>
+                    </div>
+                  </div>
+                  <div className="contact-item">
+                    <MapPin className="w-6 h-6" />
+                    <div style={{ marginLeft: "8%" }}>
+                      <h4>Ubicación</h4>
+                      <p>Alajuela, Costa Rica</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {/* 
                   <div className="contact-form">
                     <h3>Solicita una Consulta</h3>
                     <form>
@@ -184,9 +184,9 @@ export const ServicesHomePage = () => {
                       </button>
                     </form>
                   </div> */}
-                </div>
-              </div>
-            </section>
+            </div>
+          </div>
+        </section>
       </main>
       <Footer />
     </div>

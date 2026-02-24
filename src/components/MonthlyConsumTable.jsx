@@ -29,11 +29,11 @@ export function MonthlyConsumptionTable({ consumos, loading, consumptionId }) {
   const navigate = useNavigate();
 
   const handleEditarConsumo = (monthlyId) => {
-    navigate(`/consumption/monthly/edit/${consumptionId}/${monthlyId}`);
+    navigate(`/consumo/mensual/editar/${consumptionId}/${monthlyId}`);
   };
 
   const handleVerHistorial = (id) => {
-    navigate(`/consumption/monthly/history/${id}`);
+    navigate(`/consumo/mensual/historial/${id}`);
   };
 
   if (loading) {

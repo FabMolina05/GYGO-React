@@ -86,7 +86,7 @@ export function AddMonthlyConsumForm({ consumptionId }) {
         showConfirmButton: false,
         timer: 2000,
       });
-      navigate(`/consumption/monthly/${consumptionId}`);
+      navigate(`/consumo/mensual/${consumptionId}`);
     } catch (error) {
       console.error("Error al agregar consumo mensual:", error);
       setErrors({ submit: "No se pudo agregar el consumo mensual" });

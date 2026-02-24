@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useRef } from "react";
-import { 
-  Card, 
-  List, 
-  ListItem, 
-  ListItemText, 
-  Divider, 
-  Grid, 
-  TextField, 
-  IconButton, 
+import {
+  Card,
+  List,
+  ListItem,
+  ListItemText,
+  Divider,
+  Grid,
+  TextField,
+  IconButton,
   Box,
   Dialog,
   DialogTitle,
@@ -26,8 +26,8 @@ import * as signalR from "@microsoft/signalr";
 import DashboardLayout from "../examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "../examples/Navbars/DashboardNavbar";
 import { useAuth } from "../context/AuthContext";
+import { appsettings } from "../settings/appsettings";
 
-const HUB_URL = "/chatHub";
 
 export function Messages() {
   const [chats, setChats] = useState([]);
@@ -37,37 +37,49 @@ export function Messages() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [availableUsers, setAvailableUsers] = useState([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+  const [isMessageSet, setIsMessageSet] = useState(true);
   const { userId } = useAuth();
   const connectionRef = useRef(null);
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
+  const isLoadingMessagesRef = useRef(false);
+
 
   // Función para hacer scroll hacia abajo
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   // Función para hacer scroll hacia abajo inmediatamente (sin animación)
   const scrollToBottomInstant = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "instant" });
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "instant" });
+    }
   };
 
-  // Scroll hacia abajo cuando cambian los mensajes
+  // Scroll hacia abajo SOLO cuando se recibe un nuevo mensaje (no al cargar el historial)
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    // Si se está cargando el historial inicial, no hacer scroll
+    if (!isLoadingMessagesRef.current && messages.length > 0) {
+      scrollToBottom();
+    }
+  }, [messages.length]); // Solo depende de la longitud, no del array completo
+  const URL = "/api/chatHub" // para el proxy en package.json;
+  //const URL = "https://localhost:5135/chathub"; //ruta directa al hub de SignalR
 
   // Conexión SignalR
   useEffect(() => {
     const connection = new signalR.HubConnectionBuilder()
-      .withUrl(HUB_URL)
+      .withUrl(URL, { withCredentials: true })
       .withAutomaticReconnect()
       .build();
 
     connection.start().then(() => {
       // Obtener chats del usuario
       connection.invoke("getChats", userId);
-    });
+    }).catch(err => console.error("Error de conexión:", err));
 
     // Recibir lista de chats
     connection.on("ReceiveChats", (userConnections) => {
@@ -79,10 +91,12 @@ export function Messages() {
 
     // Recibir historial de mensajes
     connection.on("ReceiveMessages", (messagesHistory) => {
+      isLoadingMessagesRef.current = true;
       setMessages(messagesHistory);
       // Hacer scroll instantáneo al cargar el historial
       setTimeout(() => {
         scrollToBottomInstant();
+        isLoadingMessagesRef.current = false;
       }, 100);
     });
 
@@ -111,7 +125,7 @@ export function Messages() {
       setChats(prev => [...prev, newConnection]);
       setIsModalOpen(false);
       // Opcional: mostrar notificación de éxito
-      console.log("Contacto añadido exitosamente:", newConnection);
+      
     });
 
     connectionRef.current = connection;
@@ -141,7 +155,7 @@ export function Messages() {
 
   const handleSend = () => {
     if (input.trim() && connectionRef.current && selectedChat) {
-      connectionRef.current.invoke("SendMessage", input, userId,selectedChat.chatroom);
+      connectionRef.current.invoke("SendMessage", input, userId, selectedChat.chatroom);
       setInput("");
     }
   };
@@ -152,7 +166,7 @@ export function Messages() {
     setIsLoadingUsers(true);
     if (connectionRef.current) {
       // Asumiendo que tienes un groupId, ajusta según tu lógica
-      
+
       connectionRef.current.invoke("GetUsersByGroup");
     }
   };
@@ -168,7 +182,7 @@ export function Messages() {
     if (connectionRef.current) {
       const userConnectionRequest = {
         Id: user.id || user.Id,
-        username: user.username || user.Username 
+        username: user.username || user.Username
       };
 
       connectionRef.current.invoke("AddUserConnection", userConnectionRequest, userId);
@@ -177,7 +191,7 @@ export function Messages() {
 
   // Función para verificar si un usuario ya está en los chats
   const isUserAlreadyInChats = (user) => {
-    return chats.some(chat => 
+    return chats.some(chat =>
       (chat.username || chat.Username) === (user.username || user.Username)
     );
   };
@@ -212,10 +226,10 @@ export function Messages() {
                 <MDTypography variant="h6">
                   Chats
                 </MDTypography>
-                <IconButton 
-                  color="primary" 
+                <IconButton
+                  color="primary"
                   onClick={handleOpenAddContactModal}
-                  sx={{ 
+                  sx={{
                     backgroundColor: '#e3f2fd',
                     '&:hover': { backgroundColor: '#bbdefb' }
                   }}
@@ -323,61 +337,78 @@ export function Messages() {
                 }}
               >
                 {messages.length > 0 ? (
-                  <List sx={{ flex: 1, py: 0 }}>
-                    {messages.map((msg, idx) => {
-                      const isCurrentUser = msg.username === selectedChat?.username;
+                  <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    <List sx={{ py: 0, flex: 1, overflow: 'auto' }}>
+                      {messages.map((msg, idx) => {
+                        const isCurrentUser = msg.username === selectedChat?.username;
 
-                      return (
-                        <ListItem
-                          key={idx}
-                          sx={{
-                            display: 'flex',
-                            justifyContent: isCurrentUser ? 'flex-start' : 'flex-end',
-                            alignItems: 'flex-start',
-                            mb: 1,
-                            px: 2,
-                          }}
-                        >
-                          <Box
+                        return (
+                          <ListItem
+                            key={idx}
                             sx={{
-                              maxWidth: '70%',
-                              backgroundColor: isCurrentUser ? '#f5f5f5' : '#1976d2',
-                              color: isCurrentUser ? 'white' : '#f5f5f5',
-                              borderRadius: 2,
-                              p: 1.5,
-                              position: 'relative'
+                              display: 'flex',
+                              justifyContent: isCurrentUser ? 'flex-start' : 'flex-end',
+                              alignItems: 'flex-start',
+                              mb: 1,
+                              px: 2,
                             }}
                           >
-                            <ListItemText
-                              primary={msg.messageText}
-                              secondary={
-                                <Box
-                                  component="span"
-                                  sx={{
-                                    color: isCurrentUser ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.7)',
-                                    fontSize: '0.75rem'
-                                  }}
-                                >
-                                  {new Date(msg.timestamp).toLocaleTimeString([], {
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                  })}
-                                </Box>
-                              }
+                            <Box
                               sx={{
-                                margin: 0,
-                                '& .MuiListItemText-primary': {
-                                  fontSize: '0.9rem',
-                                  lineHeight: 1.4
-                                }
+                                maxWidth: '70%',
+                                backgroundColor: isCurrentUser ? '#f5f5f5' : '#1976d2',
+                                color: isCurrentUser ? 'white' : '#f5f5f5',
+                                borderRadius: 2,
+                                p: 1.5,
+                                position: 'relative'
                               }}
-                            />
-                          </Box>
-                        </ListItem>
-                      );
-                    })}
-                    <div ref={messagesEndRef} />
-                  </List>
+                            >
+                              <ListItemText
+                                primary={msg.messageText}
+                                secondary={
+                                  <Box
+                                    component="span"
+                                    sx={{
+                                      color: isCurrentUser ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.7)',
+                                      fontSize: '0.75rem'
+                                    }}
+                                  >
+                                    {new Date(msg.timestamp).toLocaleTimeString([], {
+                                      hour: '2-digit',
+                                      minute: '2-digit'
+                                    })}
+                                  </Box>
+                                }
+                                sx={{
+                                  margin: 0,
+                                  '& .MuiListItemText-primary': {
+                                    fontSize: '0.9rem',
+                                    lineHeight: 1.4
+                                  }
+                                }}
+                              />
+                            </Box>
+                          </ListItem>
+                        );
+                      })}
+                      <div ref={messagesEndRef} />
+                    </List>
+                    
+                    <Box
+                      sx={{
+                        py: 1,
+                        px: 2,
+                        textAlign: 'center',
+                        borderTop: '1px solid #eee',
+                        backgroundColor: '#fafafa'
+                      }}
+                    >
+                      <MDTypography variant="caption" color="textSecondary">
+                        Los mensajes se eliminarán después de 15 días
+                      </MDTypography>
+                    </Box>
+                  </Box>
+                
                 ) : (
                   <Box
                     sx={{
@@ -391,9 +422,13 @@ export function Messages() {
                     <MDTypography variant="body2">
                       No hay mensajes en este chat
                     </MDTypography>
+
                   </Box>
                 )}
+
               </MDBox>
+
+
 
               {/* Input para enviar mensaje */}
               {selectedChat && (
@@ -413,7 +448,7 @@ export function Messages() {
                     onKeyDown={(e) => e.key === "Enter" && handleSend()}
                     sx={{ mr: 1 }}
                   />
-                  <IconButton 
+                  <IconButton
                     color={input.trim() ? "primary" : "default"}
                     onClick={handleSend}
                     disabled={!input.trim()}
@@ -428,8 +463,8 @@ export function Messages() {
       </MDBox>
 
       {/* Modal para añadir contacto */}
-      <Dialog 
-        open={isModalOpen} 
+      <Dialog
+        open={isModalOpen}
         onClose={handleCloseModal}
         maxWidth="sm"
         fullWidth
@@ -450,7 +485,7 @@ export function Messages() {
               {availableUsers.length > 0 ? (
                 availableUsers.map((user, idx) => {
                   const isAlreadyAdded = isUserAlreadyInChats(user);
-                  
+
                   return (
                     <ListItem
                       key={user.id || user.Id || idx}
@@ -472,7 +507,7 @@ export function Messages() {
                         >
                           {(user.username || user.Username)?.charAt(0)?.toUpperCase()}
                         </Avatar>
-                        
+
                         <Box sx={{ flex: 1 }}>
                           <Typography variant="body1" fontWeight="medium">
                             {user.username || user.Username}
@@ -485,9 +520,9 @@ export function Messages() {
                         </Box>
 
                         {isAlreadyAdded ? (
-                          <Chip 
-                            label="Ya añadido" 
-                            size="small" 
+                          <Chip
+                            label="Ya añadido"
+                            size="small"
                             color="default"
                             variant="outlined"
                           />

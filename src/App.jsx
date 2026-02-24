@@ -14,46 +14,20 @@ Coded by www.creative-tim.com
 */
 import "regenerator-runtime/runtime";
 import { useState, useEffect, useMemo } from "react";
-
-// react-router components
-import { Routes, Route, Navigate, useLocation } from "react-router-dom";
-
-// @mui material components
+import { Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import Icon from "@mui/material/Icon";
 
-// Material Dashboard 2 React components
-import MDBox from "components/MDBox";
-
-// Material Dashboard 2 React example components
 import Sidenav from "examples/Sidenav";
-
-// Material Dashboard 2 React themes
 import theme from "assets/theme";
-import themeRTL from "assets/theme/theme-rtl";
-
-// Material Dashboard 2 React Dark Mode themes
 import themeDark from "assets/theme-dark";
-import themeDarkRTL from "assets/theme-dark/theme-rtl";
-
-// RTL plugins
-import rtlPlugin from "stylis-plugin-rtl";
-import { CacheProvider } from "@emotion/react";
-import createCache from "@emotion/cache";
-
-//Manejo de roles
 import { useAuth } from "./context/AuthContext";
-
-// Rutas
 import { routes, getRoutes } from "./routes";
-
-// Material Dashboard 2 React contexts
 import {
   useMaterialUIController,
   setMiniSidenav,
-  setOpenConfigurator,
 } from "./context/index";
+import NotFound from "./Pages/NotFound";
 
 export default function App() {
   const [controller, dispatch] = useMaterialUIController();
@@ -61,79 +35,80 @@ export default function App() {
     miniSidenav,
     direction,
     layout,
-    openConfigurator,
     sidenavColor,
-    transparentSidenav,
-    whiteSidenav,
     darkMode,
   } = controller;
   const [onMouseEnter, setOnMouseEnter] = useState(false);
-  const [rtlCache, setRtlCache] = useState(null);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const { pathname } = useLocation();
+  const { role } = useAuth();
+  const navigate = useNavigate();
 
-  const hideSidebarRoutes = [
-    "/login",
-    
-    "/sendinvite",
-    "/verify-2fa",
+  const publicRoutes = [
     "/",
-    "/homepage",
+    "*",
+    "/inicio-sesion",
+    "/pagina-inicio",
     "/certificaciones",
-    "/registro",
-    "/registro/:inviteToken",
     "/servicios",
     "/nosotros",
     "/contactos",
-    "/ChangePassword",
-    "/addGroup",
+    "/registro",
+    "/registro/:inviteToken",
+    "/restablecer-contrasena",
+    "/verificar-2fa",
+    "/agregar-grupo"
   ];
+
   const matchRoute = (route, path) => {
-    // Convertir rutas con params ":param" a regex
     const pattern = "^" + route.replace(/:\w+/g, "[^/]+") + "$";
-    const regex = new RegExp(pattern, "i");
-    return regex.test(path);
+    return new RegExp(pattern, "i").test(path);
   };
 
-  const hideSidebar = hideSidebarRoutes.some((route) => {
-    if (route.includes(":")) {
-      return matchRoute(route, pathname.toLowerCase());
-    }
+  const isPublicRoute = publicRoutes.some((route) => {
+    if (route.includes(":")) return matchRoute(route, pathname.toLowerCase());
     return route.toLowerCase() === pathname.toLowerCase();
   });
 
-  const specialRoutes = [
-    "/Login",
-    "registro",
-    "/registro/:inviteToken",
-    "/sendinvite",
-    "/verify-2fa",
-    "/ChangePassword",
-    "/",
-    "/addGroup",
-    
-  ];
-  const isSpecialRoute = specialRoutes.some((route) => {
-    if (route.includes(":")) {
-      return matchRoute(route, pathname.toLowerCase());
-    }
-    return pathname.toLowerCase().startsWith(route.toLowerCase());
-  });
-
-  const { role } = useAuth();
-
   const filteredRoutes = getRoutes(role);
 
-  // Cache for the rtl
-  useMemo(() => {
-    const cacheRtl = createCache({
-      key: "rtl",
-      stylisPlugins: [rtlPlugin],
-    });
+  // NUEVO: Función para obtener TODAS las rutas del sistema (no solo las filtradas por rol)
+  const getAllSystemRoutes = () => {
+    const allRoutes = [];
+    const extractRoutes = (routesList) => {
+      routesList.forEach((route) => {
+        if (route.route && route.route !== "*") {
+          allRoutes.push(route.route.toLowerCase());
+        }
+        if (route.collapse) {
+          extractRoutes(route.collapse);
+        }
+      });
+    };
+    extractRoutes(routes); // usa 'routes' importado, no 'filteredRoutes'
+    return allRoutes;
+  };
 
-    setRtlCache(cacheRtl);
-  }, []);
+  const allSystemRoutes = getAllSystemRoutes();
 
-  // Open sidenav when mouse enter on mini sidenav
+  // NUEVO: Verificar si la ruta actual existe en el sistema
+  const isValidSystemRoute = allSystemRoutes.some((route) => {
+    if (route.includes(":")) return matchRoute(route, pathname.toLowerCase());
+    return pathname.toLowerCase() === route;
+  });
+
+  // ESTE useEffect MANEJA LA REDIRECCIÓN
+  useEffect(() => {
+    // Si no hay rol, no es ruta pública, PERO SÍ es una ruta válida del sistema
+    // entonces redirigir a login
+    if (!role && !isPublicRoute && isValidSystemRoute && pathname !== "/inicio-sesion") {
+      setIsRedirecting(true);
+      navigate("/inicio-sesion", { replace: true });
+    } else {
+      setIsRedirecting(false);
+    }
+  }, [role, pathname, isPublicRoute, isValidSystemRoute, navigate]);
+
   const handleOnMouseEnter = () => {
     if (miniSidenav && !onMouseEnter) {
       setMiniSidenav(dispatch, false);
@@ -141,7 +116,6 @@ export default function App() {
     }
   };
 
-  // Close sidenav when mouse leave mini sidenav
   const handleOnMouseLeave = () => {
     if (onMouseEnter) {
       setMiniSidenav(dispatch, true);
@@ -149,16 +123,10 @@ export default function App() {
     }
   };
 
-  // Change the openConfigurator state
-  const handleConfiguratorOpen = () =>
-    setOpenConfigurator(dispatch, !openConfigurator);
-
-  // Setting the dir attribute for the body element
   useEffect(() => {
     document.body.setAttribute("dir", direction);
   }, [direction]);
 
-  // Setting page scroll to 0 when changing the route
   useEffect(() => {
     document.documentElement.scrollTop = 0;
     document.scrollingElement.scrollTop = 0;
@@ -179,24 +147,29 @@ export default function App() {
       return [];
     });
 
+  const hideSidebar = isPublicRoute || !isValidSystemRoute;
+
+
+  // Si está redirigiendo, mostrar loading
+  if (isRedirecting) {
+    return null;
+  }
+
   return (
     <ThemeProvider theme={darkMode ? themeDark : theme}>
       <CssBaseline />
       {layout === "dashboard" && !hideSidebar && (
-        <>
-          <Sidenav
-            color={sidenavColor}
-            brandName="GYGO"
-            routes={filteredRoutes}
-            onMouseEnter={handleOnMouseEnter}
-            onMouseLeave={handleOnMouseLeave}
-          />
-        </>
+        <Sidenav
+          color={sidenavColor}
+          brandName="GYGO"
+          routes={filteredRoutes}
+          onMouseEnter={handleOnMouseEnter}
+          onMouseLeave={handleOnMouseLeave}
+        />
       )}
-      {layout === "vr" && <Configurator />}
       <Routes>
         {renderRoutes(filteredRoutes)}
-        <Route path="*" element={<Navigate to="/homepage" />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </ThemeProvider>
   );

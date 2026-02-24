@@ -46,6 +46,7 @@ export async function CreatePDF(datos) {
 
   // Convertimos el Map a array
   const proyectos = Array.from(proyectosMap.values());
+  
   const fecha = new Date();
   const año = fecha.getFullYear();
   const mes = String(fecha.getMonth() + 1).padStart(2, "0");
@@ -56,7 +57,7 @@ export async function CreatePDF(datos) {
   const pageHeight = doc.internal.pageSize.getHeight();
   const borderRadius = 10;
 
-  // Portada (igual que antes)
+  // Portada
   doc.setFillColor(56, 71, 69);
   doc.roundedRect(
     0,
@@ -89,24 +90,21 @@ export async function CreatePDF(datos) {
   doc.text("Preparado para:", pageWidth - 60, pageHeight - 40);
 
   doc.setFontSize(10);
-  //doc.text("GET YOUR GREEN ON", 20, pageHeight - 30);
-  //doc.text("Avoc Sel.", 20, pageHeight - 25);
   const logoGYGO = await getBase64FromUrl("/logoPdf.png");
   doc.addImage(logoGYGO, "PNG", 8, pageHeight - 49, 60, 60);
 
   // Inserta logo de la empresa en portada
   if (proyectos[0].logoUrl) {
     try {
+      const baseUrl = import.meta.env.VITE_API_URL;
       const logoEmpresa = await getBase64FromUrl(
-        "https://localhost:7217/" + proyectos[0].logoUrl
+        baseUrl + proyectos[0].logoUrl
       );
       doc.addImage(logoEmpresa, "PNG", pageWidth - 60, pageHeight - 25, 40, 15);
     } catch (error) {
       console.warn("No se pudo cargar el logo en la portada:", error);
     }
   }
-
-  //doc.text("LOGO DE LA EMPRESA", pageWidth - 70, pageHeight - 30);
 
   // Ahora iteramos proyectos agrupados
   proyectos.forEach((data, index) => {
@@ -178,71 +176,144 @@ export async function CreatePDF(datos) {
     doc.setTextColor(...labelColor);
     doc.text("Actividades", leftMargin, yy);
 
-    doc.setFontSize(12);
+    doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(0, 0, 0);
     yy += 8;
 
     if (Array.isArray(data.tasks) && data.tasks.length > 0) {
-      const col1 = leftMargin + 10;
-      const col2 = leftMargin + 70;
-      const col3 = leftMargin + 130;
-
       data.tasks.forEach((task, i) => {
-        console.log(task);
-        checkPageBreak(lineHeight * 6);
-
-        // Título de la tarea
-        doc.setFont(undefined, "bold");
-
-        doc.setFont(undefined, "normal");
-        yy += lineHeight;
-
-        // Fila 1: Nombre | Descripción | Valor Actividad
-        doc.text(`Nombre: ${task.taskNombre || "-"}`, col1, yy);
-        const descripcion = doc.splitTextToSize(
-          task.taskDescripcion || "-",
-          60
+        // Calcular altura necesaria para esta tarea
+        const descripcionWidth = (pageWidth - 2 * leftMargin) * 0.58;
+        const descripcionSplit = doc.splitTextToSize(
+          task.taskDescripcion || "Sin descripción",
+          descripcionWidth - 15
         );
-
-        // Mostrar la etiqueta "Descripción:" en la primera línea
-        if (descripcion.length > 0) {
-          // Primera línea con la etiqueta
-          doc.text(`Descripción: ${descripcion[0]}`, col2, yy);
-
-          // Si hay más líneas, se colocan debajo sin la etiqueta
-          for (let i = 1; i < descripcion.length; i++) {
-            yy += lineHeight;
-            doc.text(descripcion[i], col2, yy);
-          }
-        } else {
-          doc.text("Descripción: -", col2, yy);
+        const alturaDescripcion = descripcionSplit.length * 5;
+        const alturaTarea = Math.max(42, 25 + alturaDescripcion);
+        
+        // Verificar si necesitamos nueva página
+        if (yy + alturaTarea + 10 > maxHeight) {
+          doc.addPage();
+          yy = 20;
+          
+          // Encabezado de continuación
+          doc.setFontSize(12);
+          doc.setFont("helvetica", "bold");
+          doc.setTextColor(...labelColor);
+          doc.text(`${data.projectNombre} - Actividades (continuación)`, leftMargin, yy);
+          doc.setFontSize(10);
+          doc.setFont("helvetica", "normal");
+          doc.setTextColor(0, 0, 0);
+          yy += 10;
         }
-        doc.text(`Valor: ${task.taskValorActividad ?? "-"}`, col3, yy);
-        yy += lineHeight;
 
-        // Ajustar 'yy' según el número de líneas de la descripción
-        const maxLineas = Math.max(descripcion.length, 1);
-        yy += maxLineas * lineHeight;
+        // Fondo alternado para cada tarea
+        if (i % 2 === 0) {
+          doc.setFillColor(248, 249, 250);
+          doc.roundedRect(leftMargin - 2, yy - 3, pageWidth - 2 * leftMargin + 4, alturaTarea, 2, 2, 'F');
+        }
 
-        // Fila 2: Factor Emisión | Emisiones CO2 | Estado
-        doc.text(`Factor: ${task.taskFactorEmision ?? "-"}`, col1, yy);
-        doc.text(`Emisión: ${task.taskEmisiones ?? "-"}`, col2, yy);
-        doc.text(
-          `Estado: ${task.taskEstatus ? "Realizado" : "Pendiente"}`,
-          col3,
-          yy
-        );
-        yy += lineHeight + 4;
+        // Título de la tarea con número
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(11);
+        doc.setTextColor(56, 71, 69);
+        const tituloTarea = `${i + 1}. ${task.taskNombre || "Sin nombre"}`;
+        doc.text(tituloTarea, leftMargin + 3, yy + 4);
+        
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(9);
+        doc.setTextColor(0, 0, 0);
+        
+        // COLUMNA IZQUIERDA - Descripción
+        const descripcionX = leftMargin + 3;
+        
+        doc.setFont("helvetica", "bold");
+        doc.text("Descripción:", descripcionX, yy + 11);
+        doc.setFont("helvetica", "normal");
+        
+        let descY = yy + 16;
+        descripcionSplit.forEach(linea => {
+          doc.text(linea, descripcionX + 3, descY);
+          descY += 5;
+        });
 
-        // Separador visual
-        doc.line(leftMargin, yy, 200, yy);
-        yy += 6;
-      });
+        // COLUMNA DERECHA - Datos numéricos
+        const datosX = leftMargin + descripcionWidth + 5;
+        const labelWidth = 30;
+        let datosY = yy + 11;
+        
+        // Valor Actividad
+        doc.setFont("helvetica", "bold");
+        doc.text("Valor Actividad:", datosX, datosY);
+        doc.setFont("helvetica", "normal");
+        const valorText = String(task.taskValorActividad ?? "N/A");
+        const valorTruncado = doc.splitTextToSize(valorText, 32);
+        doc.text(valorTruncado[0], datosX + labelWidth, datosY);
+        datosY += 6;
+        
+        // Factor Emisión
+        doc.setFont("helvetica", "bold");
+        doc.text("Factor Emisión:", datosX, datosY);
+        doc.setFont("helvetica", "normal");
+        const factorText = String(task.taskFactorEmision ?? "N/A");
+        const factorTruncado = doc.splitTextToSize(factorText, 32);
+        doc.text(factorTruncado[0], datosX + labelWidth, datosY);
+        datosY += 6;
+        
+        // Emisiones CO2
+        doc.setFont("helvetica", "bold");
+        doc.text("CO2:", datosX, datosY);
+        doc.setFont("helvetica", "normal");
+        const emisionText = `${task.taskEmisiones ?? "N/A"} ${data.projectUnidadNombre || ""}`;
+        const emisionTruncado = doc.splitTextToSize(emisionText, 32);
+        doc.text(emisionTruncado[0], datosX + labelWidth, datosY);
+        datosY += 6;
+        
+        // Estado con badge visual
+        doc.setFont("helvetica", "bold");
+        doc.text("Estado:", datosX, datosY);
+        doc.setFont("helvetica", "normal");
+        
+        const estado = task.taskEstatus ? "Realizado" : "Pendiente";
+        const estadoX = datosX + labelWidth;
+        
+        // Badge de fondo
+        const badgeWidth = doc.getTextWidth(estado) + 4;
+        if (task.taskEstatus) {
+          doc.setFillColor(220, 252, 231); // Verde claro
+          doc.setTextColor(21, 128, 61); // Verde oscuro
+        } else {
+          doc.setFillColor(254, 243, 199); // Amarillo claro
+          doc.setTextColor(180, 83, 9); // Naranja oscuro
+        }
+        doc.roundedRect(estadoX - 1, datosY - 4, badgeWidth, 6, 1, 1, 'F');
+        doc.text(estado, estadoX + 1, datosY);
+        doc.setTextColor(0, 0, 0); // Restaurar color
+
+        // Avanzar al final de la tarea
+        yy += alturaTarea;
+
+        // Línea separadora entre tareas (excepto la última)
+        if (i < data.tasks.length - 1) {
+          doc.setDrawColor(220, 220, 220);
+          doc.setLineWidth(0.2);
+          doc.line(leftMargin, yy + 1, pageWidth - leftMargin, yy + 1);
+          yy += 3;
+        }
+      }); // ← Cierra forEach de tasks
     } else {
-      doc.text("No hay tareas disponibles", leftMargin, yy);
+      doc.setFillColor(255, 243, 205);
+      doc.roundedRect(leftMargin, yy - 2, pageWidth - 2 * leftMargin, 10, 2, 2, 'F');
+      doc.setTextColor(146, 64, 14);
+      doc.text("⚠ No hay actividades registradas para este proyecto", leftMargin + 5, yy + 4);
+      doc.setTextColor(0, 0, 0);
+      yy += 12;
     }
-  });
+
+    // Espacio final antes del siguiente proyecto
+    yy += 10;
+  }); // ← Cierra forEach de proyectos
 
   doc.save(nombreArchivo);
 }

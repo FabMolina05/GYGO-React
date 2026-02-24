@@ -1,16 +1,18 @@
 import { appsettings } from "../settings/appsettings";
-
-
-
-
-
+import { fetchWithAuth } from "../utils/fetchWithAuth";
 
 //API para llamar los proyectos por grupo
 export async function getUsers() {
-  const response = await fetch(`${appsettings.apiUrl}ManagmentUsers/AllUsers`, {
-    method: "GET",
-    credentials: "include",
-  });
+  const response = await fetchWithAuth(
+    `${appsettings.apiUrl}ManagmentUsers/AllUsers`,
+    {
+      method: "GET",
+      credentials: "include",
+    }
+  );
+
+  if (!response) return;
+
   if (response.ok) {
     const data = await response.json();
     return data;
@@ -21,13 +23,16 @@ export async function getUsers() {
 
 //API para los projectos pendientes
 export async function getUsersbyRol(rol) {
-  const response = await fetch(
+  const response = await fetchWithAuth(
     `${appsettings.apiUrl}ManagmentUsers/rol/${rol}`,
     {
       method: "GET",
       credentials: "include",
     }
   );
+
+  if (!response) return;
+
   if (response.ok) {
     const data = await response.json();
     return data;
@@ -39,24 +44,29 @@ export async function getUsersbyRol(rol) {
 
 export const sendDefaultUserInvite = async (email) => {
   try {
-    const response = await fetch(`${appsettings.apiUrl}Admin/sendInviteDefault`, {
-      method: "POST",
-      mode: "cors",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify(email),
-    });
+    const response = await fetchWithAuth(
+      `${appsettings.apiUrl}Admin/sendInviteDefault`,
+      {
+        method: "POST",
+        mode: "cors",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(email),
+      }
+    );
+    if (!response) return;
 
-    const data = await response.text();
-    if (!response.ok) {
-      throw new Error(data || "Error al enviar invitación.");
+    const data = await response.json();
+
+    if (!data.success) {
+      return { success: false, message: data.message };
     }
 
-    return data;
+    return { success: true, message: data.message };
   } catch (error) {
-    throw error;
+    return { success: false, message: error.message || "Error de conexión" };
   }
 };

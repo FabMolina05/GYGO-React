@@ -4,6 +4,8 @@ import { Navigate } from "react-router-dom";
 ///Iconos
 import Icon from "@mui/material/Icon";
 import { EnergySavingsLeaf } from "@mui/icons-material";
+import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
+
 
 //Ruta del login
 import Login from "./Pages/Public/Login";
@@ -46,31 +48,31 @@ import { ServicesHomePage } from "./Pages/Public/ServicesPage";
 import { AboutUs } from "./Pages/Public/AboutUs";
 import { ContactUs } from "./Pages/Public/ContactUs";
 import { ChangePassword } from "./Pages/Public/ChangePassword";
+import NotFound from "./Pages/NotFound";
 
-const ProtectedElement = ({
-  children,
-  allowedRoles,
-  requiresPayment = false,
-}) => {
-  const { role, hasPaidGroupAdminAccess } = useAuth();
+const ProtectedElement = ({ children, roles }) => {
+  const { role } = useAuth();
 
+  // No está logueado
   if (!role) return <Navigate to="/login" replace />;
 
-  if (allowedRoles && !allowedRoles.includes(role)) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (requiresPayment && role === "GA" && !hasPaidGroupAdminAccess) {
-    return <Navigate to="/dashboard" replace />;
-  }
+  // No tiene rol permitido
+  if (roles && !roles.includes(role)) return <Navigate to="/" replace />;
 
   return children;
 };
 
 export const routes = [
   {
+    key: "root",
+    route: "/",
+    component: <HomePage />,
+    hideInSidebar: true,
+  },
+
+  {
     key: "HomePage",
-    route: "/HomePage",
+    route: "/pagina-inicio",
     component: <HomePage />,
   },
   {
@@ -97,27 +99,28 @@ export const routes = [
   {
     type: "collapse",
     name: "Manejo de usuarios",
-    key: "ManagmentUsers",
-    icon: <Icon fontSize="small">dashboard</Icon>,
-    route: "/ManagmentUsers",
+    key: "gestion-usuarios-admin",
+    icon: <ManageAccountsIcon fontSize="small" />,
+    route: "/gestion-usuarios-admin",
 
     component: (
-      <ProtectedElement>
+      <ProtectedElement roles={["DEV", "SA"]}>
         <ManagmentUsers />
       </ProtectedElement>
     ),
     roles: ["DEV", "SA"],
+    
   },
 
   //Ruta de dashboard no visible
   {
     type: "collapse",
     name: "Dashboard",
-    key: "Dashboard",
+    key: "panel-control",
     icon: <Icon fontSize="small">dashboard</Icon>,
-    route: "/dashboard",
+    route: "/panel-control",
     component: (
-      <ProtectedElement>
+      <ProtectedElement roles={["DEV", "GA", "GU", "DEF", "SA"]}>
         <DashboardGroupPage />
       </ProtectedElement>
     ),
@@ -131,7 +134,7 @@ export const routes = [
     name: "log",
     key: "log",
     icon: <Icon fontSize="small">dashboard</Icon>,
-    route: "/Login",
+    route: "/inicio-sesion",
     component: <Login />,
     hideInSidebar: true,
   },
@@ -159,25 +162,26 @@ export const routes = [
     name: "Mensajes",
     key: "Mensajes",
     icon: <Icon fontSize="small">email</Icon>,
-    route: "/Messages",
+    route: "/mensajes",
     component: (
-      <ProtectedElement>
+      <ProtectedElement roles={["GA", "GU", "DEV", "SA"]}>
         <Messages />
       </ProtectedElement>
     ),
-    hideInSidebar: true,
     roles: ["GA", "GU", "DEV", "SA"],
+    hideInSidebar: true,
+   
   },
 
   //Ruta de consumo
   {
     type: "collapse",
     name: "Consumo",
-    key: "consumption",
+    key: "consumo",
     icon: <EnergySavingsLeaf fontSize="small"></EnergySavingsLeaf>,
-    route: "/consumption",
+    route: "/consumo",
     component: (
-      <ProtectedElement>
+      <ProtectedElement roles={["DEV", "GA", "GU"]}>
         <ConsumptionPage />
       </ProtectedElement>
     ),
@@ -188,15 +192,16 @@ export const routes = [
     name: "Consumo mensual",
     key: "monthly-consumption",
     icon: <Icon fontSize="small">bar_chart</Icon>,
-    route: "/consumption/monthly/:id",
+    route: "/consumo/mensual/:id",
 
     component: (
-      <ProtectedElement>
+      <ProtectedElement roles={["DEV", "GA", "GU"]}>
         <MonthlyConsumptionPage />
       </ProtectedElement>
     ),
     hideInSidebar: true,
     roles: ["DEV", "GA", "GU"],
+  
   },
 
   {
@@ -204,15 +209,16 @@ export const routes = [
     name: "Editar consumo mensual",
     key: "edit-monthly-consumption",
     icon: <Icon fontSize="small">edit_calendar</Icon>,
-    route: "/consumption/monthly/edit/:consumptionId/:monthlyId",
+    route: "/consumo/mensual/editar/:consumptionId/:monthlyId",
 
     component: (
-      <ProtectedElement>
+      <ProtectedElement roles={["DEV", "GA", "GU"]}>
         <UpdateMonthlyConsumPage />
       </ProtectedElement>
     ),
     hideInSidebar: true,
     roles: ["DEV", "GA", "GU"],
+    
   },
 
   //Ruta para agregar grupo
@@ -221,14 +227,14 @@ export const routes = [
     name: "Agregar grupo",
     key: "add-group",
     icon: <Icon fontSize="small">bar_chart</Icon>,
-    route: "/addGroup",
+    route: "/agregar-grupo",
 
     component: (
-      <ProtectedElement>
+      <ProtectedElement roles={["DEV", "SA", "GA", "DEF"]}> 
         <AddGroupSAPage />
       </ProtectedElement>
     ),
-    roles: ["DEV", "SA", "GA"],
+    roles: ["DEV", "SA", "GA", "DEF"],
     hideInSidebar: true,
   },
 
@@ -238,15 +244,16 @@ export const routes = [
     name: "Historial mensual",
     key: "monthly-history",
     icon: <Icon fontSize="small">history</Icon>,
-    route: "/consumption/monthly/history/:id",
+    route: "/consumo/mensual/historial/:id",
 
     component: (
-      <ProtectedElement>
+      <ProtectedElement roles={["GA", "DEV", "GU"]}>
         <MonthlyHistoryPage />
       </ProtectedElement>
     ),
+    roles: ["GA", "DEV", "GU"], 
     hideInSidebar: true,
-    roles: ["GA", "DEV", "GU"],
+   
   },
 
   {
@@ -254,10 +261,10 @@ export const routes = [
     name: "Confirm Emission Incident",
     key: "confirm-incident",
     icon: <Icon fontSize="small">check_circle</Icon>,
-    route: "/emissions/confirm",
+    route: "/emisiones/confirmacion",
 
     component: (
-      <ProtectedElement>
+      <ProtectedElement roles={["GA", "GU", "DEV"]}>
         <ConfirmIncidentPage />
       </ProtectedElement>
     ),
@@ -271,10 +278,10 @@ export const routes = [
     name: "Perfil del Usuario",
     key: "user-profile",
     icon: <Icon fontSize="small">list_alt</Icon>,
-    route: "/userProfile",
+    route: "/perfil",
 
     component: (
-      <ProtectedElement>
+      <ProtectedElement roles={["GA", "DEV", "GU", "SA", "DEF"]}>
         <UserProfilePage />
       </ProtectedElement>
     ),
@@ -286,10 +293,10 @@ export const routes = [
     name: "Perfil del grupo",
     key: "grup-profile",
     icon: <Icon fontSize="small">list_alt</Icon>,
-    route: "/groupProfile",
+    route: "/perfil-grupo",
 
     component: (
-      <ProtectedElement>
+      <ProtectedElement roles={["GA", "DEV", "SA", "GU"]}>
         <GrupoProfilePage />
       </ProtectedElement>
     ),
@@ -302,9 +309,9 @@ export const routes = [
     name: "ChangePassword",
     key: "ChangePassword",
     icon: <Icon fontSize="small">dashboard</Icon>,
-    route: "/ChangePasswordPage",
+    route: "/cambiar-contrasena",
     component: (
-      <ProtectedElement>
+      <ProtectedElement roles={["GA", "DEV", "GU", "SA", "DEF"]}>
         <ChangePasswordPage />
       </ProtectedElement>
     ),
@@ -317,7 +324,7 @@ export const routes = [
     type: "collapse",
     name: "ChangePasswordPublic",
     key: "ChangePasswordPublic",
-    route: "/ChangePassword",
+    route: "/restablecer-contrasena",
     component: <ChangePassword />,
     hideInSidebar: true,
   },
@@ -331,14 +338,14 @@ export const routes = [
 
     collapse: [
       {
-        //Ruta para sectores  
+        //Ruta para sectores
         name: "Sectores",
-        key: "Sectors",
+        key: "sectores",
         icon: <Icon fontSize="small">place</Icon>,
         route: "/sectores",
 
         component: (
-          <ProtectedElement>
+          <ProtectedElement roles={["DEV", "SA"]}>
             <SectorsIndexPage />
           </ProtectedElement>
         ),
@@ -348,12 +355,12 @@ export const routes = [
       {
         //Ruta para unidades de reduccion
         name: "Unidades de reducción",
-        key: "Units",
+        key: "unidades",
         icon: <Icon fontSize="small">straighten</Icon>,
         route: "/unidades",
 
         component: (
-          <ProtectedElement>
+          <ProtectedElement roles={["DEV", "SA"]}>
             <UnitsIndexPage />
           </ProtectedElement>
         ),
@@ -361,27 +368,28 @@ export const routes = [
       },
       //Ruta para fuentes de emisiones
       {
-        name: "Fuentes de Emisión",
-        key: "sources",
+        name: "Fuentes de emisión",
+        key: "fuentes-emision",
         icon: <Icon fontSize="small">eco</Icon>,
-        route: "/sources",
+        route: "/fuentes-emision",
 
         component: (
-          <ProtectedElement>
+          <ProtectedElement roles={["DEV", "SA"]}>
             <SourcesIndexPage />
           </ProtectedElement>
         ),
         roles: ["DEV", "SA"],
+
       },
       ///gESTIONES DEL ADMIN DE GRUPO
 
       {
-        name: "Servicios",
-        key: "Services",
+        name: "Servicios contratados",
+        key: "servicios-contratados",
         icon: <Icon fontSize="small">business</Icon>,
-        route: "/Services",
+        route: "/servicios-contratados",
         component: (
-          <ProtectedElement>
+          <ProtectedElement roles={["SA", "DEV"]}>
             <ServicesPage />
           </ProtectedElement>
         ),
@@ -389,13 +397,13 @@ export const routes = [
       },
 
       {
-        name: "Factor Emision",
-        key: "AdminFactorEmision",
+        name: "Factor emision",
+        key: "factor-emision",
         icon: <Icon fontSize="small">eco</Icon>,
-        route: "/AdminEmisionFactor",
+        route: "/factor-emision",
 
         component: (
-          <ProtectedElement>
+          <ProtectedElement roles={["DEV", "SA"]}>
             <AdminEmisionFactor />
           </ProtectedElement>
         ),
@@ -405,15 +413,15 @@ export const routes = [
       //Ruta Tabla de usuarios
       {
         name: "Usuarios",
-        key: "AdminUserDashboard",
+        key: "gestion-usuarios",
         icon: <Icon fontSize="small">dashboard</Icon>,
-        route: "/AdminUserDashboard",
+        route: "/gestion-usuarios",
         component: (
-          <ProtectedElement>
+          <ProtectedElement roles={["GA", "DEV"]}>
             <AdminUserDashboard />
           </ProtectedElement>
         ),
-        roles: ["GA", "DEV"],
+        roles: ["GA", "DEV"], 
       },
     ],
     roles: ["DEV", "SA", "GA"],
@@ -423,12 +431,11 @@ export const routes = [
   {
     type: "collapse",
     name: "Suscripción",
-    key: "subscription",
+    key: "suscripcion",
     icon: <Icon fontSize="small">receipt_long</Icon>,
-    route: "/subscription",
+    route: "/suscripcion",
     component: <SubscriptionSwitch />,
-    roles: ["DEV", "SA", "DEF", "GA"],
-    hideInSidebar: true,
+    roles: ["DEV", "DEF", "GA"],
   },
 
   {
@@ -436,78 +443,82 @@ export const routes = [
     name: "Agregar consumo",
     key: "add-consumption",
     icon: <Icon fontSize="small">add</Icon>,
-    route: "/consumption/add",
+    route: "/consumo/agregar",
     component: (
-      <ProtectedElement>
+      <ProtectedElement roles={["DEV", "GA", "GU"]}>
         <AddConsumptionPage />
       </ProtectedElement>
     ),
-    hideInSidebar: true,
+     hideInSidebar: true,
     roles: ["DEV", "GA", "GU"],
+   
+ 
   },
   {
     type: "collapse",
     name: "Actualizar consumo",
     key: "add-consumption",
     icon: <Icon fontSize="small">add</Icon>,
-    route: "/consumption/edit/:id",
+    route: "/consumo/editar/:id",
     component: (
-      <ProtectedElement>
+      <ProtectedElement roles={["DEV", "GA", "GU"]}>
         <UpdateConsumptionPage />
       </ProtectedElement>
     ),
     hideInSidebar: true,
     roles: ["DEV", "GA", "GU"],
+    
+
   },
   {
     type: "collapse",
     name: "Editar consumo mensual",
     key: "edit-monthly-consumption",
     icon: <Icon fontSize="small">edit_calendar</Icon>,
-    route: "/consumption/monthly/edit/:consumptionId/:monthlyId",
+    route: "/consumo/mensual/editar/:consumptionId/:monthlyId",
     component: (
-      <ProtectedElement>
+      <ProtectedElement roles={["DEV", "GA", "GU"]}>
         <UpdateMonthlyConsumPage />
       </ProtectedElement>
     ),
     hideInSidebar: true,
     roles: ["DEV", "GA", "GU"],
+    
+
   },
   {
     type: "collapse",
     name: "Agregar consumo mensual",
     key: "add-monthly-consumption",
     icon: <Icon fontSize="small">add_circle</Icon>,
-    route: "/consumption/monthly/add/:consumptionId",
+    route: "/consumo/mensual/agregar/:consumptionId",
     component: (
-      <ProtectedElement>
+      <ProtectedElement roles={["DEV", "GA", "GU"]}>
         <AddMonthlyConsumPage />
       </ProtectedElement>
     ),
-    hideInSidebar: true,
+     hideInSidebar: true,
     roles: ["DEV", "GA", "GU"],
   },
 
   {
-    type: "collapse",
-    name: "Segundo Factor",
+   
+  
     key: "Segundo-Factor",
-    icon: <Icon fontSize="small">add_circle</Icon>,
-    route: "/verify-2fa",
+    route: "/verificar-2fa",
     component: <Verify2FA />,
-    hideInSidebar: true,
   },
 
   //Ruta de incidents history
   {
     type: "collapse",
     name: "Historial de incidentes",
-    key: "incidents-history",
+    key: "emisiones/incidentes",
     icon: <Icon fontSize="small">list_alt</Icon>,
-    route: "/emissions/incidents",
+    route: "/emisiones/incidentes",
 
     component: (
-      <ProtectedElement>
+      <ProtectedElement roles={["GA", "DEV"]}>
         <IncidentsHistoryPage />
       </ProtectedElement>
     ),
@@ -521,7 +532,7 @@ export const routes = [
     name: "Consumo mensual",
     key: "monthly-consumption",
     icon: <Icon fontSize="small">bar_chart</Icon>,
-    route: "/consumption/monthly/:id",
+    route: "/consumo/mensual/:id",
     component: <MonthlyConsumptionPage />,
     hideInSidebar: true,
   },
@@ -530,12 +541,12 @@ export const routes = [
   {
     type: "collapse",
     name: "Proyectos",
-    key: "Proyectos",
+    key: "proyectos",
     icon: <Icon fontSize="small">table_view</Icon>,
-    route: "/ProjectPage",
+    route: "/proyectos",
 
     component: (
-      <ProtectedElement>
+      <ProtectedElement roles={["GA", "GU", "DEV"]}>
         <ProjectPage />
       </ProtectedElement>
     ),
@@ -552,12 +563,12 @@ export const routes = [
     collapse: [
       {
         name: "Emisiones",
-        key: "emissions-reports",
+        key: "reportes-emisiones",
         icon: <Icon fontSize="small">insert_chart</Icon>,
-        route: "/reportsEmissions",
+        route: "/reportes-emisiones",
 
         component: (
-          <ProtectedElement>
+          <ProtectedElement roles={["GA", "DEV"]}>
             <ReportsEmissionsPage />
           </ProtectedElement>
         ),
@@ -565,12 +576,12 @@ export const routes = [
       },
       {
         name: "Empresas",
-        key: "companies-reports",
+        key: "reportes-empresas",
         icon: <Icon fontSize="small">insert_chart</Icon>,
-        route: "/ReportCompanies",
+        route: "/reportes-empresas",
 
         component: (
-          <ProtectedElement>
+          <ProtectedElement roles={["SA", "DEV"]}>
             <ReportCompanies />
           </ProtectedElement>
         ),
@@ -579,12 +590,12 @@ export const routes = [
 
       {
         name: "Servicios",
-        key: "Services-reports",
+        key: "reportes-servicios",
         icon: <Icon fontSize="small">insert_chart</Icon>,
-        route: "/ReportServices",
+        route: "/reportes-servicios",
 
         component: (
-          <ProtectedElement>
+          <ProtectedElement roles={["SA", "DEV"]}>
             <ReportServices />
           </ProtectedElement>
         ),
@@ -593,12 +604,23 @@ export const routes = [
     ],
     roles: ["DEV", "GA"],
   },
+
+  // Ruta 404
+  {
+    key: "not-found",
+    route: "*",
+    component: <NotFound />,
+    hideInSidebar: true,
+  },
 ];
 
 export const getRoutes = (role) => {
   const filterByRole = (routesList) => {
     return routesList
       .map((route) => {
+        // Si la ruta requiere roles y el usuario no tiene rol, bloquear
+        if (route.roles && !role) return null;
+        
         // Verificamos si este ítem tiene permiso
         const hasAccess = !route.roles || (role && route.roles.includes(role));
 
