@@ -23,7 +23,7 @@
 
 ## 📖 Descripción
 
-**Gygo** es una aplicación web fullstack diseñada para centralizar la gestión operativa de equipos y proyectos. Permite a los administradores tener visibilidad completa sobre el estado de sus proyectos, los usuarios del sistema, los incidentes registrados y generar reportes detallados — todo desde un único panel de control.
+**Gygo** es una aplicación web fullstack diseñada para centralizar la gestión operativa de equipos y proyectos. Permite a los administradores tener visibilidad completa sobre el estado de sus proyectos, los usuarios del sistema, los incidentes registrados y generar reportes detallados, además de contar con un sistema de mensajería para los integrantes de los equipos. —.
 
 ---
 
@@ -47,7 +47,7 @@
 ### Frontend
 - **React 18** con **Vite** — SPA rápida y moderna
 - **React Router DOM** — Navegación entre vistas
-- **Axios** — Consumo de la API REST
+- **Fetch** — Consumo de la API REST
 
 ### Backend
 - **.NET 8** — API RESTful
