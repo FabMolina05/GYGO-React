@@ -15,8 +15,6 @@
 - [Funcionalidades principales](#-funcionalidades-principales)
 - [Tecnologías](#-tecnologías)
 - [Capturas de pantalla](#-capturas-de-pantalla)
-- [Instalación y setup](#-instalación-y-setup)
-- [Variables de entorno](#-variables-de-entorno)
 - [Licencia](#-licencia)
 
 ---
