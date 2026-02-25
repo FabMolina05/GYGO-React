@@ -107,13 +107,13 @@
 ![Proyectos](./screenshots/proyectos.png)
 
 -Creación de Proyecto
-![Proyectos](./screenshots/proyectos1.png)
-
--Creación de Actividad
 ![Proyectos](./screenshots/proyectos2.png)
 
--Lista de Actividades del Proyecto
+-Creación de Actividad
 ![Proyectos](./screenshots/proyectos3.png)
+
+-Lista de Actividades del Proyecto
+![Proyectos](./screenshots/proyectos4.png)
 
 ### 📊 Reportes
 -Vista principal
